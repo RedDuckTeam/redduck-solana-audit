@@ -1,0 +1,10 @@
+[
+  {
+    "cid": "89721ddd3989",
+    "evalId": "c06a",
+    "program": "benchmark/fixtures/c06a/program",
+    "severity": "high",
+    "location": "src/instructions/open.rs:50",
+    "mechanism": "The solvency check counts the vault balance, which includes players' pending  paid  costs that  cancel  refunds and  withdraw  can take, as backing for  reserved  prizes. With a small  fund_prizes  deposit, many crates can be opened whose combined prizes exceed real funds, so winning  reveal  transfers (reveal.rs:81) fail or the vault becomes insolvent."
+  }
+]

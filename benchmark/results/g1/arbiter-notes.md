@@ -1,0 +1,35 @@
+# Arbiter notes: g1
+
+- 8868eb88fa89 (c19a): valid, src/lib.rs:45. The only check on `publish_epoch` is `has_one = authority` (lib.rs:185), so any root is accepted. `fund` (lib.rs:28) and `register` (lib.rs:63) are open to anyone, so the authority can add its own leaf and drain third-party funds. This is a centralization dependency, and the claimed consequence follows.
+- aa054876a3ec (c20a): valid, src/lib.rs:148. The `reporter` in CreateMarket is unconstrained, `register_reporter` is permissionless (lib.rs:14), and `resolve` takes the result of the market's chosen reporter (lib.rs:176, 86). A creator who runs its own reporter can settle the market as it likes and take the opposing stakes. This is a trust dependency, and it is real.
+- f806bdf78126 (c24b): false, src/lib.rs:79,96. `request_unstake` lowers `staker.staked` at once (lib.rs:79), so a stake/close/unstake in one transaction leaves no balance for the engine to credit. `withdraw` only works after the next close (lib.rs:96), so a cool-down does exist, and a just-in-time stake locks capital for a full epoch. There are no free points.
+- 6654c3eecfdf (c19a): valid, src/lib.rs:45. Same flaw as 8868eb88fa89: the authority can publish any root and drain funds that third parties sent through `fund`.
+- dd5bcd0ff8d8 (c20a): valid, src/lib.rs:43. Same flaw as aa054876a3ec: the creator picks an unvetted reporter and that reporter alone settles the market (lib.rs:176).
+- 3639798c317e (c20a): valid, src/lib.rs:79-87. `resolve` never compares `report.posted_at` (stored at lib.rs:29, never read) with `closes_at`, and `create_market` accepts an event that has already been reported. A market whose result is already known can be staked on and drained, even with an honest reporter.
+- 2953c7bce6d2 (c19b): valid, src/lib.rs:45. Same authority-drain flaw: the root is unchecked (lib.rs:184) and `fund` is open (lib.rs:28).
+- f93c77e0982b (c19a): false, src/lib.rs:89. Accepting any epoch is documented as intended (lib.rs:72-73). The strict `earned_total > affiliate.claimed` keeps payouts monotonic, so an old root never pays more than the highest total already published. The loss needs the trusted authority to publish a wrong root first, and leaves are cumulative totals that never go down, so this is the design working as intended.
+- bb5439a9a4aa (c19b): valid, src/lib.rs:45. Same authority-drain flaw: there is no check on the root, and the authority can claim the whole vault through a self-registered affiliate (lib.rs:63).
+- 7d75c06d7f77 (c20a): valid, src/lib.rs:43. Same trust dependency on the reporter the creator picks. One report per reporter and event (lib.rs:134) means a wrong report cannot be corrected.
+- dbf5630d22cc (c20a): false, src/lib.rs:39,56. `closes_at` is a public parameter the creator sets, and staking is voluntary. A market that never closes locks only the funds of people who choose to stake in it, nobody gains anything, and any far-future value behaves the same without the saturation. The impact is negligible: the market behaves as its own terms say.
+- aeb6801a1c20 (c24b): valid, src/lib.rs:137. `close_epoch` sets `epoch_started_at = ends_at`, not `now`, so overdue epochs can be closed back to back in one transaction. Each close emits the same `total_staked` (lib.rs:133), and the engine credits balances for every closed epoch (ARCHITECTURE.md:5). A stake made just before a catch-up therefore earns K epochs for under one epoch of lock. This depends on keeper liveness (ARCHITECTURE.md:6), and the consequence follows.
+- 8c9bb54e32b9 (c20b): valid, src/lib.rs:79-87. Same flaw as 3639798c317e: `report.posted_at` is never checked against `closes_at`, so someone who stakes on a report posted early takes the losers' funds.
+- 3c444cae4c14 (c19b): valid, src/lib.rs:45. Same authority-drain flaw (an unchecked root grants the whole vault). Accepting old epochs forever (lib.rs:220) adds to it.
+- 53e332dce6ab (c19b): valid, src/lib.rs:45. Same authority-drain flaw: `published_at` (lib.rs:51) is never enforced, and nothing is checked against funding.
+- d70f8d548cd1 (c20a): valid, src/lib.rs:38/43. Same reporter trust dependency as aa054876a3ec.
+- dd8b9d0de514 (c19b): valid, src/lib.rs:45. Same authority-drain flaw: the root takes effect immediately and the authority can claim in the same slot.
+- 8aa07f134ecb (c19a): valid, src/lib.rs:45. Same authority-drain flaw as 8868eb88fa89.
+- 6cbf0b1e17bc (c19b): valid, src/lib.rs:45. Same authority-drain flaw.
+- 886a8233a612 (c20a): valid, src/lib.rs:24,79. Same posted_at flaw as 3639798c317e: `post_report` has no time check, and `resolve` only checks `now >= closes_at` (lib.rs:82).
+- 55bc42760cd4 (c19a): false, src/lib.rs:89. Same no-revocation claim as f93c77e0982b. The behaviour is documented (lib.rs:72-73), payouts are monotonic, and the loss needs the trusted authority to have published a wrong root.
+- 41a9d7d6afc0 (c24b): false, src/lib.rs:96. A just-in-time stake earns one epoch of points but is then locked until the next close (lib.rs:96, ARCHITECTURE.md:7). The points per epoch of locked capital match honest staking, so the dilution is negligible and is the snapshot design described in ARCHITECTURE.md:5.
+- 8746b2930d4c (c20a): valid, src/lib.rs:79. Same posted_at flaw as 3639798c317e. Creating a market on an event that has already been reported is not blocked (lib.rs:38-51).
+- c4085660d475 (c19b): valid, src/lib.rs:184. Same authority-drain flaw: `PublishEpoch` requires only the authority signer.
+- b712910292f1 (c19a): false, src/lib.rs:89. Same no-revocation claim as f93c77e0982b. Under key compromise the drain happens whether or not roots can be revoked, so the drain itself is covered by the centralization findings.
+
+## Spot-check
+
+Seed 20261028. The pool is the 27 vulnerable-side runs whose evalId is c19b, c20b or c24a, taken in file order: g1-sonnet/runs.json first, then g1-opus/runs.json. Each pick uses `s=(s*1664525+1013904223)>>>0`, takes `idx = s % remaining`, and removes the run from the pool. The picks were filtered indices 6, 15 and 10.
+
+- #6 (c20b, g1-sonnet): recorded found=true. Agree. The Critical finding at lib.rs:176 says `Resolve.reporter` is not bound to `market.reporter` and that `has_one = reporter` only matches the reporter the caller passes, and it gives the consequence: register your own reporter, post the result you want, resolve, claim the pool. That is the rubric's first PASS criterion.
+- #15 (c24a, g1-sonnet): recorded found=true. Agree. The High finding says only `pool.authority`, the keeper's operator key, can call `close_epoch`, and that `withdraw` needs `pool.epoch > request.epoch`. If the key or keeper stops, pending unstakes stay locked for good. That is the rubric's first PASS criterion: it ties the authority to `close_epoch` and to locked withdrawals.
+- #10 (c20b, g1-sonnet): recorded found=true. Agree. The Critical finding at lib.rs:173-179 says `Resolve` never checks that the reporter equals `market.reporter`, and that anyone can register a reporter, post a report for the target `event_id`, resolve, and claim the vault. That is the rubric's first PASS criterion.

@@ -1,0 +1,8 @@
+benchmark/public/vendor/
+benchmark/logs/
+target/
+node_modules/
+**/evals/results/
+benchmark/stub-plugin/evals/
+.DS_Store
+benchmark/results/*/traces/

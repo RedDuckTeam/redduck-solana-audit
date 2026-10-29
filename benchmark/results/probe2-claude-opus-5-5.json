@@ -1,0 +1,609 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T20:09:04.738Z",
+  "durationSeconds": 225,
+  "costUsd": 1.5964223999999998,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\benchmark\\stub-plugin",
+    "ablation": "none",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "tagFilters": [
+      "vuln"
+    ],
+    "threshold": 0,
+    "concurrency": 2,
+    "plugins": [
+      {
+        "name": "baseline-stub",
+        "version": "0.0.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\benchmark\\stub-plugin"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c01b",
+      "dir": "evals\\c01b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `borrow` prices the collateral from the live SPL balances of the pool vaults\n(`pool_base_vault.amount` / `pool_quote_vault.amount`) instead of the program-tracked\n`reserve_base` / `reserve_quote`. A user can inflate `pool_quote_vault.amount` with a\ndirect token transfer in the same transaction, raising the computed price and the borrow\nlimit. The price must come from state that only program actions can move.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/borrow.rs lines 41-47\n- src/instructions/borrow.rs lines 39-79\n- src/instructions/borrow.rs lines 24-28\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the borrow price is read from the pool vault token balances\n  (`.amount`), which a user can inflate within one transaction by transferring tokens\n  into the vault, and that this drives an inflated borrow. Naming the use of `.amount`\n  vs the tracked reserves, or the same-transaction donation, is required.\n- A finding that only flags `swap` is a FAIL: swap correctly uses the tracked reserves.\n- A finding that only says \"use an oracle\" without identifying that the valuation reads\n  a manipulable balance is a partial/near miss; to pass it must point at the live-balance\n  read in `borrow` (or equivalently that reserves/lagged accounting should be used).\n- Flagging `add_liquidity` or the authority as the flaw is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `borrow` prices the collateral from the live SPL balances of the pool vaults\n(`pool_base_vault.amount` / `pool_quote_vault.amount`) instead of the program-tracked\n`reserve_base` / `reserve_quote`. A user can inflate `pool_quote_vault.amount` with a\ndirect token transfer in the same transaction, raising the computed price and the borrow\nlimit. The price must come from state that only program actions can move.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/borrow.rs lines 41-47\n- src/instructions/borrow.rs lines 39-79\n- src/instructions/borrow.rs lines 24-28\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the borrow price is read from the pool vault token balances\n  (`.amount`), which a user can inflate within one transaction by transferring tokens\n  into the vault, and that this drives an inflated borrow. Naming the use of `.amount`\n  vs the tracked reserves, or the same-transaction donation, is required.\n- A finding that only flags `swap` is a FAIL: swap correctly uses the tracked reserves.\n- A finding that only says \"use an oracle\" without identifying that the valuation reads\n  a manipulable balance is a partial/near miss; to pass it must point at the live-balance\n  read in `borrow` (or equivalently that reserves/lagged accounting should be used).\n- Flagging `add_liquidity` or the authority as the flaw is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "turns": 16,
+            "costUsd": 0.34324799999999994,
+            "judgeCostUsd": 0.017934,
+            "durationSeconds": 73,
+            "startedAt": "2026-10-28T20:09:04.848Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-7RAoJ9\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: `lending_desk` (./program)\n\nScope: every file under `program/src`, Anchor 0.31.1. I reviewed the code by hand. I did not build it, run tests or deploy it.\n\n## 1. Borrow limit is priced from manipulable pool vault balances (donation / spot-price oracle)\n\nSeverity: Critical\nLocation: program/src/instructions/borrow.rs:41\nMechanism: `borrow` prices collateral as `pool_quote_vault.amount / pool_base_vault.amount`. These are raw SPL balances that anyone can inflate by sending quote tokens straight to the vault, and they are separate from the tracked `reserve_*` values. An attacker who deposits a lot of base collateral relative to a shallow pool can donate a small amount of quote. Their borrow limit then rises by about `collateral * donation / pool_base * ltv`, so they can drain `borrow_vault` and walk away from the debt.\n\n## 2. No liquidation mechanism, so bad debt cannot be recovered\n\nSeverity: High\nLocation: program/src/lib.rs:12\nMechanism: The program has no liquidate instruction and no health check after the borrow. When the collateral price drops, or after the price manipulation in finding 1, an undercollateralized position stays open forever. Lenders absorb the loss and nobody has an incentive or a way to close the position.\n\n## 3. Market authority can drain all lendable funds and repayments at any time\n\nSeverity: High\nLocation: program/src/instructions/add_liquidity.rs:76\nMechanism: `withdraw_liquidity` lets the authority move any amount out of `borrow_vault` to any quote account. There is no lender accounting, no limit and no timelock. This includes tokens that borrowers repaid, so funds sit fully under one key, and borrowing can be stopped at will by emptying the vault.\n\n## 4. Market authority controls the borrow oracle price\n\nSeverity: High\nLocation: program/src/instructions/add_liquidity.rs:34\nMechanism: `add_liquidity` accepts any `base_amount`/`quote_amount` ratio, and the price pool only ever holds the authority's own liquidity. The authority can therefore set the collateral price that `borrow` uses to any value, for example by adding only quote. That lets it, or an accomplice, borrow the whole `borrow_vault` against worthless collateral.\n\n## 5. Permissionless, front-runnable market creation (pair squatting)\n\nSeverity: Medium\nLocation: program/src/instructions/init.rs:19\nMechanism: The market PDA is seeded only by `(base_mint, quote_mint)`, and anyone can call `init_market`. The first caller permanently becomes the authority of the only market for that pair and picks its LTV. An attacker can front-run the intended deployer and take over the authority powers described in findings 3 and 4.\n\n## 6. Pool liquidity and swap proceeds are permanently locked\n\nSeverity: Medium\nLocation: program/src/instructions/add_liquidity.rs:56\nMechanism: No instruction transfers out of `pool_base_vault`. `pool_quote_vault` is only paid out through swaps. So the base tokens added by the authority and the base tokens paid in by traders can never be withdrawn. The same is true for any donated tokens. This is a liveness and fund-loss problem in the design.\n\n## 7. No lender deposit path; borrow vault is funded only out-of-band\n\nSeverity: Medium\nLocation: program/src/instructions/init.rs:46\nMechanism: No instruction lets lenders deposit into `borrow_vault` or receive shares, so the vault can only be filled by raw transfers. Those transfers immediately belong to the authority (see finding 3). Lenders have no on-chain claim, the protocol has no accounting of lent funds, and borrowing does not work until someone funds the vault this way.\n\n## 8. One-directional swap and no swap fee: the price can only be pushed down, and LPs earn nothing\n\nSeverity: Low\nLocation: program/src/instructions/swap.rs:33\nMechanism: Only `swap_base_for_quote` exists. Arbitrage can never correct the pool price upward, so it drifts away from the market price and drains `pool_quote_vault`. With no fee, the pool also earns nothing, which makes the pool even less reliable as a price source.\n\n## 9. Tracked reserves diverge from actual vault balances\n\nSeverity: Low\nLocation: program/src/instructions/swap.rs:38\nMechanism: `swap` prices trades from `reserve_base`/`reserve_quote`, while `borrow` uses the live vault balances, and there is no sync instruction. Donations or other direct transfers make the two prices disagree, which makes the oracle manipulation in finding 1 easier and makes the pool price inconsistent.\n\n## 10. Collateral cannot be partially withdrawn while any debt exists\n\nSeverity: Low\nLocation: program/src/instructions/collateral.rs:62\nMechanism: `withdraw_collateral` requires `debt == 0` instead of checking the health factor after the withdrawal. Users with heavily over-collateralized positions cannot take out excess collateral. They have to repay everything first, which hurts capital efficiency and usability.\n\n## 11. LTV up to 100% allowed, with no interest accrual\n\nSeverity: Low\nLocation: program/src/instructions/init.rs:53\nMechanism: `ltv_bps` may be 10,000, which allows borrowing the full collateral value with no safety buffer, so any price drop creates bad debt. Debt also never accrues interest, so lenders get no compensation and long-lived positions carry no cost.\n\n## 12. Price truncation for low-priced or decimal-mismatched pairs\n\nSeverity: Info\nLocation: program/src/instructions/borrow.rs:44\nMechanism: The price is computed in raw units scaled by only `PRICE_SCALE = 1e6`. When quote raw units per base raw unit is below 1e-6, for example because of a large difference in mint decimals, the price truncates to 0 and borrowing is impossible. Coarse rounding also misprices collateral in other cases.\n\n## 13. Minimal event coverage\n\nSeverity: Info\nLocation: program/src/events.rs:3\nMechanism: Only `borrow` emits an event. Repayments, collateral moves, swaps, liquidity changes and authority withdrawals happen silently, so off-chain monitoring of the authority's actions in findings 3 and 4 is difficult.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.75,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "c03b",
+      "dir": "evals\\c03b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "turns": 16,
+            "costUsd": 0.30698159999999997,
+            "judgeCostUsd": 0.016026,
+            "durationSeconds": 82,
+            "startedAt": "2026-10-28T20:09:04.848Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-XGpe5w\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: `note_market` (./program)\n\nScope: `program/src/**` (Anchor 0.31.1). Instructions: initialize_vault, open_position, deposit, accrue_yield, withdraw, redeem, close_position.\n\n---\n\n## 1. Withdraw rounds notes-to-burn down, so the vault can be drained for free\n\nSeverity: Critical\nLocation: program/src/instructions/withdraw.rs:44\nMechanism: `notes_to_burn = assets * total_notes / total_assets` rounds down, and nothing requires `notes_to_burn > 0`. Once yield has made one note worth more than one asset, any position, including a freshly opened one with 0 notes and `unlock_ts = 0`, can withdraw `assets < total_assets/total_notes` while burning 0 notes. Larger withdrawals also skip up to one note's worth on every call. Repeating this (many calls per transaction) drains every depositor's assets. Fix: round up (ceil division) and require `notes_to_burn > 0`.\n\n## 2. Accounting desync can brick the vault (division by zero / orphaned assets)\n\nSeverity: High\nLocation: program/src/instructions/deposit.rs:44\nMechanism: The rounding in finding 1 can push `total_assets` to 0 while `total_notes > 0`. After that, `deposit` divides by `total_assets == 0` and panics, so no one can deposit again. Rounding can also leave `total_assets > 0` with `total_notes == 0`, and then the next depositor is minted 1:1 and takes the orphaned assets. Neither state is guarded against.\n\n## 3. Yield sniping around accrue_yield (JIT deposits)\n\nSeverity: Medium\nLocation: program/src/instructions/accrue.rs:46\nMechanism: Yield is added as one discrete jump in `total_assets`. Anyone who sees a pending or predictable `accrue_yield` can deposit just before it and take a pro-rata share of yield earned over a period they were not in the vault. They then exit after only the 1-hour `HOLD_SECS`, diluting long-term holders. Yield should be streamed or vested over time instead.\n\n## 4. Permissionless vault initialization lets anyone squat a mint's only vault\n\nSeverity: Medium\nLocation: program/src/instructions/initialize.rs:17\nMechanism: The vault PDA is seeded only by the asset mint, and anyone can call `initialize_vault`, becoming its permanent `authority`. An attacker can front-run the intended deployer and take the single vault for any mint (USDC, etc.). The legitimate operator then cannot create it, and the attacker controls yield accrual. This also limits the design to one vault per mint (a scalability/architecture limitation).\n\n## 5. Centralized, immutable authority is the sole yield source (liveness/centralization)\n\nSeverity: Medium\nLocation: program/src/state.rs:11\nMechanism: Only `vault.authority` can add yield, and there is no instruction to rotate, transfer or renounce it. A lost or compromised key permanently halts yield (liveness), and the vault's economics depend entirely on one off-chain actor manually pushing tokens. Nothing on-chain enforces or verifies any yield.\n\n## 6. Authority-driven share-price inflation steals depositor rounding\n\nSeverity: Low\nLocation: program/src/instructions/deposit.rs:44\nMechanism: The authority can deposit 1 unit (1 note) and then `accrue_yield` a large amount, which makes one note worth a very large amount. Later deposits are rounded down to whole notes, and the remainder (up to one note's value per deposit) accrues to the authority's note. There is no minimum initial deposit or virtual-shares offset.\n\n## 7. No slippage / min-out parameters\n\nSeverity: Low\nLocation: program/src/instructions/deposit.rs:34\nMechanism: `deposit`, `withdraw` and `redeem` take no `min_notes_out` / `max_notes_burned` / `min_assets_out` argument. Users therefore cannot bound the exchange rate they get when the price moves (for example via `accrue_yield` or other users' rounding) between signing and execution.\n\n## 8. Every deposit resets the lock on the whole position\n\nSeverity: Low\nLocation: program/src/instructions/deposit.rs:62\nMechanism: `unlock_ts` is overwritten on each deposit, so a small top-up re-locks all previously matured notes for another hour. This is self-griefing only, but it can trap funds a user expected to be liquid (for example if a frontend auto-compounds).\n\n## 9. Tokens sent directly to the vault token account are permanently stuck\n\nSeverity: Info\nLocation: program/src/instructions/accrue.rs:46\nMechanism: The program tracks `total_assets` internally rather than reading the token balance. This prevents donation attacks, but any tokens transferred straight to `vault_token` are never accounted for, and there is no sweep instruction to recover them.\n\n## 10. Mint freeze authority can freeze the vault\n\nSeverity: Info\nLocation: program/src/instructions/initialize.rs:11\nMechanism: Any mint is accepted, including ones with a freeze authority. That authority can freeze `vault_token` and halt all withdrawals and redemptions (an external liveness dependency).\n\n## 11. Missing event for redeem\n\nSeverity: Info\nLocation: program/src/instructions/redeem.rs:66\nMechanism: `redeem` moves funds but emits no event, unlike `deposit` and `withdraw`. Off-chain indexers and monitoring therefore miss these exits.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.75,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "c04a",
+      "dir": "evals\\c04a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: The per-wallet purchase cap is enforced in `buy` (checks `buyer.purchased + amount <=\nper_wallet_cap`) but not in the second purchase path `buy_bundle`, which only checks a\nper-transaction limit and the hard cap. A buyer uses `buy_bundle` repeatedly to acquire\nfar more than `per_wallet_cap`. The invariant must be guarded on every path.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/buy_bundle.rs lines 36-80\n- src/instructions/buy_bundle.rs lines 41-41\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must state that `buy_bundle` does not enforce the cumulative per-wallet cap that\n  `buy` enforces, so a buyer exceeds `per_wallet_cap` by using `buy_bundle` (repeatedly).\n  Identifying the missing `purchased <= per_wallet_cap` check on the bundle path is\n  required.\n- A finding that the `per_tx_limit` check in `buy_bundle` is sufficient, or that only\n  flags the bonus arithmetic, is a FAIL.\n- A finding that only says \"add validation to buy_bundle\" without naming the per-wallet\n  cap / the fact that the limit is bypassable across transactions is a FAIL.\n- Flagging the hard-cap handling is a FAIL; it is enforced on both paths.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: The per-wallet purchase cap is enforced in `buy` (checks `buyer.purchased + amount <=\nper_wallet_cap`) but not in the second purchase path `buy_bundle`, which only checks a\nper-transaction limit and the hard cap. A buyer uses `buy_bundle` repeatedly to acquire\nfar more than `per_wallet_cap`. The invariant must be guarded on every path.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/buy_bundle.rs lines 36-80\n- src/instructions/buy_bundle.rs lines 41-41\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must state that `buy_bundle` does not enforce the cumulative per-wallet cap that\n  `buy` enforces, so a buyer exceeds `per_wallet_cap` by using `buy_bundle` (repeatedly).\n  Identifying the missing `purchased <= per_wallet_cap` check on the bundle path is\n  required.\n- A finding that the `per_tx_limit` check in `buy_bundle` is sufficient, or that only\n  flags the bonus arithmetic, is a FAIL.\n- A finding that only says \"add validation to buy_bundle\" without naming the per-wallet\n  cap / the fact that the limit is bypassable across transactions is a FAIL.\n- Flagging the hard-cap handling is a FAIL; it is enforced on both paths.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "turns": 15,
+            "costUsd": 0.29915539999999996,
+            "judgeCostUsd": 0.014933999999999996,
+            "durationSeconds": 59,
+            "startedAt": "2026-10-28T20:10:18.320Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-5VxAhO\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report — `launchpad` program (./program)\n\nScope: all files under `program/src` (Anchor 0.31.1 fixed-price token sale: initialize, open buyer, buy, buy_bundle, claim, withdraw proceeds/unsold).\n\n## Findings\n\n### 1. `buy_bundle` bypasses the per-wallet cap\nSeverity: High\nLocation: program/src/instructions/buy_bundle.rs:70\nMechanism: `buy_bundle` adds `credited` to `buyer.purchased` without ever checking `sale.per_wallet_cap` (only `per_tx_limit`, which is per call), unlike `buy` (buy.rs:48). A single wallet can call `buy_bundle` repeatedly (or several times in one transaction) to buy up to the entire hard cap, plus bonus, defeating the fair-distribution cap and letting one whale or bot take the whole sale.\n\n### 2. Anyone can squat the sale PDA for any mint (front-running / DoS of sale creation)\nSeverity: Medium\nLocation: program/src/instructions/initialize.rs:30\nMechanism: The `Sale`, `payment_vault` and `sale_vault` PDAs are seeded only by `sale_mint`, and `initialize_sale` is permissionless with no check linking the caller to the mint (for example the mint authority). An attacker can front-run the project's `initialize_sale` with their own authority and parameters, which permanently blocks the real sale for that mint and leaves an attacker-controlled \"official-looking\" sale at the canonical address that can fool buyers.\n\n### 3. Global `Sale` account is a write-lock hotspot (scalability)\nSeverity: Low\nLocation: program/src/instructions/buy.rs:12\nMechanism: Every `buy`/`buy_bundle` takes the single `Sale` account (and `payment_vault`) as writable to update `sold`. Solana runs these transactions one after another, so during a popular launch throughput is capped by one account's write lock. That causes widespread transaction failures, priority-fee bidding wars and a bot advantage.\n\n### 4. Per-wallet cap is trivially sybil-able (architecture)\nSeverity: Low\nLocation: program/src/instructions/open.rs:24\nMechanism: `open_buyer` is permissionless and free apart from rent, so the per-wallet cap only limits one key, not one participant. A single actor can split purchases across many wallets to get around the cap, so the cap gives no real fairness guarantee without an allowlist or identity gating.\n\n### 5. Buyers fully trust the sale authority; no refund / soft-cap / vesting protection (centralization)\nSeverity: Medium\nLocation: program/src/instructions/withdraw.rs:28\nMechanism: When `end_ts` passes, the authority can withdraw 100% of proceeds right away with no soft cap, refund path or vesting. Buyers also get no protection if the authority (or the sale-mint freeze authority) then freezes or abandons the project. For example, the `sale_mint` freeze authority (not checked at init, initialize.rs:24) can freeze `sale_vault` after proceeds are withdrawn, which blocks every claim.\n\n### 6. Sale authority cannot be rotated; lost key strands proceeds and unsold tokens (liveness)\nSeverity: Low\nLocation: program/src/state.rs:7\nMechanism: `authority` is set once in `initialize_sale`, and no instruction can transfer or update it. There is also no pause or parameter update and no close instruction. If the authority key is lost or compromised, proceeds and unsold tokens in the vaults can never be recovered, or are lost to the attacker, and misconfigured sales cannot be fixed.\n\n### 7. `bonus_bps` and sale window are not validated\nSeverity: Low\nLocation: program/src/instructions/initialize.rs:61\nMechanism: `bonus_bps` accepts any u16 (up to 65535 = 655% bonus), and `start_ts`/`end_ts` are only checked for ordering, not against the current time. A misconfigured or malicious sale can give a huge bonus that drains the hard cap through `buy_bundle`, or open/close at unintended times.\n\n### 8. Price has no decimal scaling (precision / UX)\nSeverity: Info\nLocation: program/src/instructions/buy.rs:50\nMechanism: `cost = amount * price` is in raw base units of both mints, so the minimum price is 1 payment base unit per sale base unit, and prices for mints with different decimals cannot be expressed precisely. That leads to mispricing or overflow-induced purchase failures for high-decimal sale tokens.\n\n### 9. Bonus rounds down per transaction\nSeverity: Info\nLocation: program/src/instructions/buy_bundle.rs:46\nMechanism: The bonus is floored per call (`amount * bonus_bps / 10_000`), so small bundles get zero bonus and results depend on how purchases are split. This doesn't let anyone steal funds, but the bonus is applied inconsistently.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.75,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "c06a",
+      "dir": "evals\\c06a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `cancel` refunds and closes an open commitment with no timing restriction. Once the\nrandomness slot (`reveal_slot`) has passed, the outcome is already determined and\nreadable from `SlotHashes` before any transaction is sent, so a player reveals winners\nand cancels losers for a full refund — free re-rolls that drain the prize pool. A\ncommitted (randomness-assigned) crate must not be abandonable for a refund.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/cancel.rs lines 33-53\n- src/instructions/cancel.rs lines 6-31\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that a losing commitment can be cancelled/refunded after the\n  outcome is knowable (no check that `slot < reveal_slot`), enabling free re-rolls / only\n  revealing wins. Naming the missing timing guard on `cancel`, or the ability to abandon\n  a determined bet, is required.\n- A finding that only flags `reveal` (same-tx resolution, user-controlled randomness) is\n  a FAIL: reveal is correctly split and permissionless, sourced from the committed slot\n  hash.\n- A finding that only says \"randomness is weak / use a VRF\" without identifying the\n  refundable-cancel abandonment is a FAIL for this case.\n- Flagging the `slot_hashes` unchecked account or the house authority is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `cancel` refunds and closes an open commitment with no timing restriction. Once the\nrandomness slot (`reveal_slot`) has passed, the outcome is already determined and\nreadable from `SlotHashes` before any transaction is sent, so a player reveals winners\nand cancels losers for a full refund — free re-rolls that drain the prize pool. A\ncommitted (randomness-assigned) crate must not be abandonable for a refund.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/cancel.rs lines 33-53\n- src/instructions/cancel.rs lines 6-31\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that a losing commitment can be cancelled/refunded after the\n  outcome is knowable (no check that `slot < reveal_slot`), enabling free re-rolls / only\n  revealing wins. Naming the missing timing guard on `cancel`, or the ability to abandon\n  a determined bet, is required.\n- A finding that only flags `reveal` (same-tx resolution, user-controlled randomness) is\n  a FAIL: reveal is correctly split and permissionless, sourced from the committed slot\n  hash.\n- A finding that only says \"randomness is weak / use a VRF\" without identifying the\n  refundable-cancel abandonment is a FAIL for this case.\n- Flagging the `slot_hashes` unchecked account or the house authority is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "turns": 16,
+            "costUsd": 0.34710799999999997,
+            "judgeCostUsd": 0.015647999999999995,
+            "durationSeconds": 89,
+            "startedAt": "2026-10-28T20:10:27.166Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-0C78ag\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: `loot_crate` (./program)\n\nScope: `program/src/**` (Anchor 0.31.1). The program is a loot-crate game: a player pays `cost`, and the crate resolves from the SlotHashes entry for `reveal_slot = open_slot + 1`.\n\n---\n\n## 1. Player can cancel after seeing the outcome (free option / house drain)\n\nSeverity: Critical\nLocation: program/src/instructions/cancel.rs:33\nMechanism: `cancel` has no time or state restriction, so once `reveal_slot`'s hash is in SlotHashes, a player can simulate `reveal` and call `cancel` for a full refund of `paid` whenever the roll is a loss. Players keep every win and never lose, which drains the prize pool at no risk.\n\n## 2. Randomness taken from a slot hash that the leader controls\n\nSeverity: High\nLocation: program/src/instructions/reveal.rs:76\nMechanism: The roll is the first 8 bytes of the bank hash of `open_slot + 1`. The leader of that slot (known ahead of time from the leader schedule) can grind the hash by choosing which transactions to include, or can skip the slot. A validator-player or a colluding/bribed leader can only open crates before its own slots and get the win it wants. The house can do the same to force losses.\n\n## 3. Skipped or expired reveal slot counts as a loss\n\nSeverity: Medium\nLocation: program/src/instructions/reveal.rs:73\nMechanism: If `reveal_slot` is skipped (this happens regularly on mainnet), or more than about 512 slots (~3–4 minutes) pass before reveal, the crate is settled as a loss even though the player paid. Anyone can call `reveal`, so the house or a griefer can wait out the window during congestion and then settle a losing result. This hidden extra house edge also creates a liveness requirement: players must reveal within minutes.\n\n## 4. No slippage protection on open; authority can front-run odds/prize changes\n\nSeverity: Medium\nLocation: program/src/instructions/open.rs:34\nMechanism: `open_crate` takes no expected `odds_bps`/`prize`/`cost` from the user and uses whatever is in `House` when it executes. The authority can front-run pending opens with `set_odds` (for example `odds_bps = 1`, `prize = cost`), so players pay full cost for an almost-worthless crate.\n\n## 5. House PDA keyed only by mint, so anyone can squat a mint's house\n\nSeverity: Medium\nLocation: program/src/instructions/init.rs:25\nMechanism: `init_house` is permissionless and the House/vault PDAs are seeded only by `[b\"house\", mint]` / `[b\"vault\", mint]`. Only one house can exist per mint program-wide, and whoever calls first (for example for USDC) becomes its authority forever. Later operators can't deploy for that mint, and users can be lured into an attacker-controlled house.\n\n## 6. Mint freeze authority not checked, so the vault can be frozen and pending winners turn into losses\n\nSeverity: Low\nLocation: program/src/instructions/init.rs:19\nMechanism: Any mint is accepted, including mints with a freeze authority. If the vault is frozen, every winning `reveal` reverts on the transfer. Once the slot hash ages out, the crate can only be settled as a loss, so whoever controls freeze authority can turn wins into losses (and block `cancel`/`withdraw`).\n\n## 7. Centralized, non-rotatable authority with unrestricted parameter control\n\nSeverity: Low\nLocation: program/src/instructions/set_odds.rs:19\nMechanism: One authority key can change odds/prize at any time with no timelock or bounds on house edge, and can withdraw all unreserved vault funds (including costs paid into pending crates) to any account. The authority can't be rotated, so a lost or compromised key permanently loses or takes over the house.\n\n## 8. Single global House account write-locked by every player action\n\nSeverity: Low\nLocation: program/src/instructions/open.rs:12\nMechanism: `open_crate`, `reveal` and `cancel` all take `house` as writable (to update `reserved`), so every crate operation for a mint is serialized on one account. This caps throughput and hurts landing under load, which makes the short reveal window in finding 3 worse.\n\n## 9. One pending crate per player per house\n\nSeverity: Info\nLocation: program/src/instructions/open.rs:19\nMechanism: The Commitment PDA is seeded by `[house, player]` only, so a player can't open a second crate until the first is revealed or cancelled. This is a usability and scalability limit. The fix is to add a nonce/counter to the seeds.\n\n## 10. Saturating subtraction hides reserve-accounting errors\n\nSeverity: Info\nLocation: program/src/instructions/reveal.rs:98\nMechanism: `reserved.saturating_sub(prize)` (also cancel.rs:51) silently clamps at zero instead of failing. Any accounting bug would be hidden and could let `withdraw` release funds that should still be reserved. Use `checked_sub` with an error.\n\n## 11. Modulo bias in roll\n\nSeverity: Info\nLocation: program/src/instructions/reveal.rs:76\nMechanism: `u64 % 10_000` has a small bias because 2^64 is not a multiple of 10,000. It is negligible in practice, but rejection sampling would remove it.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.75,
+        "passRate": 0
+      }
+    },
+    {
+      "name": "c07b",
+      "dir": "evals\\c07b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `enter_match` pays the player's stake out of the base-layer vault into the\noperator-controlled `executor` account, and the only ways the stake returns and\n`in_match` clears are `settle_match` and `expire_match`, both operator-only. `withdraw`\nis blocked while `in_match`, and there is no timeout a user can trigger alone, so if the\noperator/rollup stops, deposits are stranded. The fix keeps funds in the vault\n(delegating only match state) and adds an L1 timeout exit in `withdraw`.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/enter.rs lines 45-46\n- src/instructions/enter.rs lines 33-54\n- src/instructions/withdraw.rs lines 32-37\n- src/instructions/settle.rs lines 30-45\n- src/instructions/expire.rs lines 30-46\n- ARCHITECTURE.md lines 15-28\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that user funds are handed to the off-chain / operator-controlled\n  executor and can only return via the operator (`settle_match` / `expire_match`), with\n  no base-layer exit, so a stalled operator/rollup strands user deposits. Naming the\n  missing user-controlled L1 exit (timeout / permissionless withdrawal) or the fact that\n  funds rather than only round state are delegated is required.\n- A finding that only observes \"the operator is trusted / centralized\" without\n  connecting it to the inability to exit on L1 is a near miss; to pass it must identify\n  the stranded-funds / no-exit consequence.\n- A finding that only flags the `settle_match` operator check as missing validation is a\n  FAIL; the operator is a listed trusted role.\n- Reporting a theft/fund-stealing exploit is a FAIL; this is a liveness/exit (design)\n  issue.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `enter_match` pays the player's stake out of the base-layer vault into the\noperator-controlled `executor` account, and the only ways the stake returns and\n`in_match` clears are `settle_match` and `expire_match`, both operator-only. `withdraw`\nis blocked while `in_match`, and there is no timeout a user can trigger alone, so if the\noperator/rollup stops, deposits are stranded. The fix keeps funds in the vault\n(delegating only match state) and adds an L1 timeout exit in `withdraw`.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/enter.rs lines 45-46\n- src/instructions/enter.rs lines 33-54\n- src/instructions/withdraw.rs lines 32-37\n- src/instructions/settle.rs lines 30-45\n- src/instructions/expire.rs lines 30-46\n- ARCHITECTURE.md lines 15-28\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that user funds are handed to the off-chain / operator-controlled\n  executor and can only return via the operator (`settle_match` / `expire_match`), with\n  no base-layer exit, so a stalled operator/rollup strands user deposits. Naming the\n  missing user-controlled L1 exit (timeout / permissionless withdrawal) or the fact that\n  funds rather than only round state are delegated is required.\n- A finding that only observes \"the operator is trusted / centralized\" without\n  connecting it to the inability to exit on L1 is a near miss; to pass it must identify\n  the stranded-funds / no-exit consequence.\n- A finding that only flags the `settle_match` operator check as missing validation is a\n  FAIL; the operator is a listed trusted role.\n- Reporting a theft/fund-stealing exploit is a FAIL; this is a liveness/exit (design)\n  issue.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "turns": 17,
+            "costUsd": 0.2999294,
+            "judgeCostUsd": 0.024646,
+            "durationSeconds": 92,
+            "startedAt": "2026-10-28T20:11:17.666Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-VO0X92\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# wager_arena Security Audit Report\n\nScope: `program/src/**` and `program/ARCHITECTURE.md`.\n\n## Findings\n\n### 1. Staked funds leave program custody and sit in an operator-controlled account\nSeverity: Critical\nLocation: program/src/instructions/enter.rs:46\nMechanism: `enter_match` moves the stake from the PDA-owned vault into `arena.executor`, a plain token account whose authority is the operator key, not a program PDA. Anyone holding the operator key can call SPL `Transfer` on the executor directly and take every in-match stake. The program can't stop this, and a leaked or malicious operator key is enough to drain all live stakes.\n\n### 2. No permissionless exit: stakes are locked forever if the operator stops\nSeverity: High\nLocation: program/src/instructions/expire.rs:14\nMechanism: The only ways to clear `in_match` and get the stake back are `settle_match` and `expire_match`, and both require the operator signature (the executor transfer also needs the operator as token authority). If the match service or rollup goes down, the key is lost, or the operator refuses to sign, players' stakes stay frozen with no way out after `match_deadline`. `withdraw` is also blocked while `in_match` is set. This is a liveness failure.\n\n### 3. Arena creation is permissionless and can be front-run per mint, with an unchecked executor\nSeverity: High\nLocation: program/src/instructions/init.rs:32\nMechanism: `init_arena` lets any signer create the one canonical arena PDA for a mint (seeds `[arena, mint]`) and choose any `operator` and any `executor` token account of that mint. Only the mint is checked; owner, delegate and close authority are not. An attacker can front-run the team's deployment for a mint and set their own operator and executor. Every stake entered in that arena then goes to an account the attacker controls, and the real team can never create an arena for that mint.\n\n### 4. Executor authority/state never validated against the operator\nSeverity: Medium\nLocation: program/src/instructions/init.rs:46\nMechanism: The program never checks that `executor.owner == operator`, or that the executor has no delegate, close authority or frozen state. If they don't match, `settle_match` and `expire_match` always fail and stakes are stuck. A delegate or close authority set on the executor can also move or destroy the escrowed stakes.\n\n### 5. No key rotation or admin controls (centralization, key-compromise response)\nSeverity: Medium\nLocation: program/src/state.rs:7\nMechanism: `authority` and `operator` are written once at init. No instruction rotates the operator, replaces the executor, or pauses the arena, and `authority` is never used after init. If the operator key is compromised there is no on-chain way to respond, and the stakes stay exposed to finding 1.\n\n### 6. Settlement depends on executor holding enough tokens (shared, commingled escrow)\nSeverity: Medium\nLocation: program/src/instructions/settle.rs:35\nMechanism: All players' stakes are pooled in one executor account, and settlement moves `player.staked` back without any per-match accounting. If the off-chain service spends or moves executor funds (for example for rollup settlement), later `settle_match`/`expire_match` calls fail with insufficient funds, and the players who settle last absorb the shortfall.\n\n### 7. Match results are fully operator-asserted and not bound to a match\nSeverity: Low\nLocation: program/src/instructions/settle.rs:41\nMechanism: `settle_match(won)` takes a bare boolean from the operator, with no opponent, match ID, or rollup proof/state commitment. The operator can award or withhold `wins` (ranking) at will, at any time, for any in-match player. Nothing on chain pairs the two players of a \"1v1\" match.\n\n### 8. Scalability: global write-lock on vault and executor\nSeverity: Low\nLocation: program/src/instructions/enter.rs:24\nMechanism: Every `deposit`, `enter_match`, `settle_match`, `expire_match` and `withdraw` takes a write lock on the single arena `vault`, and the match instructions also lock the single `executor`. All activity in an arena is serialized on those two accounts, which caps throughput and lets a spammer cause contention or priority-fee pressure for everyone.\n\n### 9. Operator can settle/expire before the match actually concludes\nSeverity: Low\nLocation: program/src/instructions/settle.rs:31\nMechanism: `settle_match` has no timing or state check besides `in_match`, so the operator can end any player's match at any moment. The only check on this is trusting the off-chain service.\n\n### 10. Missing events for settlement and expiry\nSeverity: Info\nLocation: program/src/instructions/settle.rs:44\nMechanism: `settle_match` and `expire_match` emit no events (unlike deposit/enter/withdraw). That makes it harder for indexers and monitors to spot unexpected or malicious operator settlements.\n\n### 11. \"Wager\" stake is never actually wagered\nSeverity: Info\nLocation: program/src/instructions/settle.rs:38\nMechanism: The stake always goes back to the same player whatever `won` says, so the program's custody model contradicts its \"wager\" framing. Moving the funds to the operator-controlled executor (finding 1) adds custody risk without any economic purpose on chain.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": false,
+                "weight": 1,
+                "explanation": "Skill called 0x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.75,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 5,
+    "casesPassed": 5,
+    "overallScore": 0.75,
+    "overallPassRate": 0
+  }
+}

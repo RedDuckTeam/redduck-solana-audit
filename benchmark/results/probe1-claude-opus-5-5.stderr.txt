@@ -1,0 +1,2 @@
+Note: --scaffold runs each case's scaffold_script as you. Only use it on case files you (or your org) authored.
+Report: E:\work\RedDuck-Software\redduck-solana-audit\benchmark\stub-plugin\evals\results\2026-10-28T19-57-09-151Z\report.html

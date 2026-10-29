@@ -1,0 +1,1455 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T20:43:45.138Z",
+  "durationSeconds": 487,
+  "costUsd": 2.7788023000000006,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "tagFilters": [
+      "dev"
+    ],
+    "threshold": 0,
+    "concurrency": 2,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c03a",
+      "dir": "evals\\c03a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 14,
+            "costUsd": 0.1607441,
+            "judgeCostUsd": 0,
+            "durationSeconds": 49,
+            "startedAt": "2026-10-28T20:43:45.352Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-nL4Hee\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c03b",
+      "dir": "evals\\c03b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 4,
+            "costUsd": 0.2328154,
+            "judgeCostUsd": 0.012875999999999999,
+            "durationSeconds": 80,
+            "startedAt": "2026-10-28T20:43:45.353Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-kJPGHl\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: note_market\n\nProgram: `./program` (Anchor). Instructions: initialize_vault, open_position, deposit, accrue_yield, withdraw, redeem, close_position.\n\n## Findings\n\n### F1\nSeverity: Medium\nLocation: program/src/instructions/withdraw.rs:43\nMechanism: `notes_to_burn` is rounded down and never required to be > 0, so once `total_assets > total_notes` anyone (even an empty position with `unlock_ts = 0`, see open.rs:29) can call `withdraw` with small amounts that burn zero or too few notes and take yield from other depositors, repeatedly. Fix: round up and `require!(notes_to_burn > 0)`.\nVerification: finding-verifier originally rated High and downgraded it to Medium. The loss is capped at the accrued yield above 1:1 and shrinks with each call, and principal is not at risk. No exploit test was run (no toolchain).\n\n### F2\nSeverity: Low\nLocation: program/src/instructions/initialize.rs:17\nMechanism: Vault creation is permissionless and the PDA is derived only from the mint, so whoever calls first becomes `vault.authority` for that mint's canonical vault. This can be done by front-running the intended team. The authority can only fund yield, so impact is limited to a squatted or unexpected vault.\n\n### F3\nSeverity: Low\nLocation: program/src/instructions/accrue.rs:29\nMechanism: Yield is added as a lump sum by a single authority key and is not distributed over time. A depositor who sees it coming can deposit beforehand, wait out the 1-hour `HOLD_SECS`, and capture a share of yield earned by earlier depositors. If the authority stops, no yield accrues.\n\n### F4\nSeverity: Low\nLocation: program/src/instructions/deposit.rs:44\nMechanism: `deposit`, `withdraw` and `redeem` take no minimum-out or maximum-in bound (`withdraw.rs:43`, `redeem.rs:43`). The share price changes with `accrue_yield` and with other users' rounding, so users cannot bound the rate they sign for.\n\n### F5\nSeverity: Info\nLocation: program/src/instructions/deposit.rs:62\nMechanism: Every deposit resets the whole position's `unlock_ts`. Anyone can lock their own funds again, but a lock timer that renews on each top-up can surprise the owner and makes the hold period unfriendly to dollar-cost-averaging users.\n\n## Design findings\n\n### D1\nSeverity: Low\nLocation: program/src/state.rs:10\nMechanism: Every user instruction writes the single global `Vault` account, so all deposits and withdrawals for a mint serialize on one hot account. Throughput for a popular vault is limited. Total assets are tracked internally and not read from the token balance, so direct donations are ignored (this is good, as it blocks classic inflation attacks).\n\n### D2\nSeverity: Low\nLocation: program/src/instructions/accrue.rs:16\nMechanism: `vault.authority` is fixed at creation. There is no instruction to rotate or transfer it, so a lost or compromised authority key cannot be replaced, and yield stops permanently if the key is lost. The authority has no power over user funds.\n\n## Coverage notes\n\n- Checked: arithmetic (u128 intermediates, checked ops; `-=` in withdraw.rs:50-52 and redeem.rs:48-50 is guarded by earlier checks), account validation (PDA seeds, `has_one`, `address = vault.vault_token`, token mint/authority constraints), SPL Token only (no Token-2022), close_position requires empty notes, no `remaining_accounts`, no CPI beyond SPL Token, no reload-after-CPI issues.\n- Redeem rounds down in the protocol's favour. Deposit rounds notes down in the protocol's favour and rejects zero notes.\n- This report does not include the full per-pattern coverage table the audit skill asks for. Only the notes above summarize what was checked.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c06a",
+      "dir": "evals\\c06a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `cancel` refunds and closes an open commitment with no timing restriction. Once the\nrandomness slot (`reveal_slot`) has passed, the outcome is already determined and\nreadable from `SlotHashes` before any transaction is sent, so a player reveals winners\nand cancels losers for a full refund — free re-rolls that drain the prize pool. A\ncommitted (randomness-assigned) crate must not be abandonable for a refund.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/cancel.rs lines 33-53\n- src/instructions/cancel.rs lines 6-31\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that a losing commitment can be cancelled/refunded after the\n  outcome is knowable (no check that `slot < reveal_slot`), enabling free re-rolls / only\n  revealing wins. Naming the missing timing guard on `cancel`, or the ability to abandon\n  a determined bet, is required.\n- A finding that only flags `reveal` (same-tx resolution, user-controlled randomness) is\n  a FAIL: reveal is correctly split and permissionless, sourced from the committed slot\n  hash.\n- A finding that only says \"randomness is weak / use a VRF\" without identifying the\n  refundable-cancel abandonment is a FAIL for this case.\n- Flagging the `slot_hashes` unchecked account or the house authority is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `cancel` refunds and closes an open commitment with no timing restriction. Once the\nrandomness slot (`reveal_slot`) has passed, the outcome is already determined and\nreadable from `SlotHashes` before any transaction is sent, so a player reveals winners\nand cancels losers for a full refund — free re-rolls that drain the prize pool. A\ncommitted (randomness-assigned) crate must not be abandonable for a refund.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/cancel.rs lines 33-53\n- src/instructions/cancel.rs lines 6-31\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that a losing commitment can be cancelled/refunded after the\n  outcome is knowable (no check that `slot < reveal_slot`), enabling free re-rolls / only\n  revealing wins. Naming the missing timing guard on `cancel`, or the ability to abandon\n  a determined bet, is required.\n- A finding that only flags `reveal` (same-tx resolution, user-controlled randomness) is\n  a FAIL: reveal is correctly split and permissionless, sourced from the committed slot\n  hash.\n- A finding that only says \"randomness is weak / use a VRF\" without identifying the\n  refundable-cancel abandonment is a FAIL for this case.\n- Flagging the `slot_hashes` unchecked account or the house authority is a FAIL.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.22765760000000004,
+            "judgeCostUsd": 0.013349999999999997,
+            "durationSeconds": 73,
+            "startedAt": "2026-10-28T20:44:34.483Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-afZ8Fn\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: loot_crate (program/)\n\n## Findings\n\n### F1\nSeverity: Critical\nLocation: program/src/instructions/cancel.rs:33\nMechanism: `cancel` has no slot or state restriction and refunds the full `paid` cost, while the outcome hash for `reveal_slot` is public once that slot passes. A player computes the roll off-chain, calls `reveal` if it wins and `cancel` if it loses, so they win every time with no downside and drain the vault.\nVerification: confirmed by finding-verifier (no toolchain exploit test run).\n\n### F2\nSeverity: High\nLocation: program/src/instructions/open.rs:50\nMechanism: The solvency check counts the vault balance, which includes players' pending `paid` costs that `cancel` refunds and `withdraw` can take, as backing for `reserved` prizes. With a small `fund_prizes` deposit, many crates can be opened whose combined prizes exceed real funds, so winning `reveal` transfers (reveal.rs:81) fail or the vault becomes insolvent.\n\n### F3\nSeverity: Medium\nLocation: program/src/instructions/withdraw.rs:29\nMechanism: `free = vault - reserved` ignores that pending commitments' `paid` amounts are refundable via `cancel`. The authority can withdraw down to `reserved`, after which cancels or later reveals can fail for lack of funds.\n\n### F4\nSeverity: Medium\nLocation: program/src/instructions/reveal.rs:75\nMechanism: If the SlotHashes entry is missing (skipped slot, or older than about 512 slots), the crate silently settles as a loss. A skipped slot, or a delay before anyone reveals, makes a legitimate player lose their cost without any random outcome. Reveal is also permissionless, so the timing is controlled by whoever calls it first.\n\n### F5\nSeverity: Low\nLocation: program/src/instructions/reveal.rs:98\nMechanism: `saturating_sub` on `reserved` (also cancel.rs:51) masks accounting errors instead of failing, so drift in `reserved` goes undetected and can later over-permit `withdraw`.\n\n### F6\nSeverity: Low\nLocation: program/src/instructions/init.rs:25\nMechanism: The house PDA is seeded only by the mint and `init_house` is permissionless. Anyone can create the house for a mint first with their own authority and parameters, which blocks the intended operator and can lure players into an attacker-run house.\n\n### F7\nSeverity: Low\nLocation: program/src/instructions/init.rs:51\nMechanism: The authority is a single key with no transfer or rotation instruction. The authority can change `odds_bps` and `prize` at will (set_odds.rs:19) and withdraw all free funds (withdraw.rs:27). Loss of the key strands the house's funds permanently, and a compromised key gives full control.\n\n## Design findings\n\n- Randomness comes from a recent slot hash (reveal.rs:75), which is influenceable by validators and not suitable for high-value outcomes. It must be paired with a commit that cannot be abandoned (see F1).\n- Every crate opens against a single shared vault and `House` account (open.rs:12), so all players write to one hot account. This limits throughput and serializes transactions.\n- Only one crate can be open per player per house (PDA seeds at open.rs:19), which is a minor usability limit.\n\n## Coverage\n\n| Item | Verdict |\n|---|---|\n| commit-execution-split | found (F1) |\n| boundary-of-consent | found (F4; players cannot bound the cost or odds they get, since they are read from mutable `House` state at open.rs:35) |\n| defensive-computation | found (F2) |\n| one-way-state | found (F1, F5) |\n| dependency-independency | found (F7) |\n| untrusted-executor | clear (reveal is permissionless, reveal.rs:11) |\n| root-of-trust | clear (PDAs with seeds, `address = house.vault`) |\n| checklist-init-frontrun | found (F6) |\n| checklist-authority-transfer | found (F7) |\n| checklist-arithmetic | clear (checked_add in open.rs:50) except F5 |\n| other patterns and checklist items | n/a or clear; not exercised in this small program |\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c06b",
+      "dir": "evals\\c06b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 15,
+            "costUsd": 0.1966805,
+            "judgeCostUsd": 0,
+            "durationSeconds": 64,
+            "startedAt": "2026-10-28T20:45:04.947Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-nWyQ3O\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c09a",
+      "dir": "evals\\c09a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 14,
+            "costUsd": 0.2091639,
+            "judgeCostUsd": 0,
+            "durationSeconds": 78,
+            "startedAt": "2026-10-28T20:45:47.847Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-LpnlYr\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c09b",
+      "dir": "evals\\c09b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `merge_positions` gives the target a recomputed weight. The merged amount at the later lock end can exceed the two old weights combined. It never applies that change to `Season.total_weight`, which the other weight-changing paths keep in sync. `finalize_season` snapshots the stale, too-low total. `claim_reward` then pays `reward_amount * weight / final_total_weight` against it, so the claims add up to more than the reward vault and the merger takes other holders' rewards.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/position.rs lines 121-125\n- src/instructions/position.rs lines 133-152\n- src/instructions/season.rs lines 65-77\n- src/instructions/exit.rs lines 58-76\n- src/state.rs lines 22-25\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that merging positions changes position weight without updating the season's total weight, or that the total can fall below the sum of position weights through merge. It must also say that rewards are then over-allocated or mis-distributed at claim or finalization.\n- PASS also if the finding is phrased as \"merge recomputes weight with the longer lock but `total_weight` is unchanged, so reward shares sum to more than 100%\".\n- FAIL: a finding that only says merge lets someone boost their weight or \"gain extra rewards\", without pointing at the missing `total_weight` update. Boosting weight with a longer lock is intended.\n- FAIL: findings about `withdraw` after finalization not reducing the total, about `extend_lock` or `add_stake` accounting, or about rounding in `pro_rata`. These paths are correct.\n- FAIL: generic \"add more validation to merge\" without naming the season total weight.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `merge_positions` gives the target a recomputed weight. The merged amount at the later lock end can exceed the two old weights combined. It never applies that change to `Season.total_weight`, which the other weight-changing paths keep in sync. `finalize_season` snapshots the stale, too-low total. `claim_reward` then pays `reward_amount * weight / final_total_weight` against it, so the claims add up to more than the reward vault and the merger takes other holders' rewards.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/position.rs lines 121-125\n- src/instructions/position.rs lines 133-152\n- src/instructions/season.rs lines 65-77\n- src/instructions/exit.rs lines 58-76\n- src/state.rs lines 22-25\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that merging positions changes position weight without updating the season's total weight, or that the total can fall below the sum of position weights through merge. It must also say that rewards are then over-allocated or mis-distributed at claim or finalization.\n- PASS also if the finding is phrased as \"merge recomputes weight with the longer lock but `total_weight` is unchanged, so reward shares sum to more than 100%\".\n- FAIL: a finding that only says merge lets someone boost their weight or \"gain extra rewards\", without pointing at the missing `total_weight` update. Boosting weight with a longer lock is intended.\n- FAIL: findings about `withdraw` after finalization not reducing the total, about `extend_lock` or `add_stake` accounting, or about rounding in `pro_rata`. These paths are correct.\n- FAIL: generic \"add more validation to merge\" without naming the season total weight.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.27589159999999996,
+            "judgeCostUsd": 0.018973999999999994,
+            "durationSeconds": 105,
+            "startedAt": "2026-10-28T20:46:08.925Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-EgekCi\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit: season_locker (Anchor)\n\n## Findings\n\n### F1\nSeverity: High\nLocation: program/src/instructions/position.rs:144\nMechanism: `merge_positions` raises `target.weight` to `lock_weight(total amount, later lock_end, now)`, but `Season.total_weight` is never updated (season is not `mut`, line 125). A user merges a large 7-day position into a tiny 4-year position and gets 4x weight on all tokens with no matching total. `claim_reward` (exit.rs:66) then overpays them, and the sum of claims can exceed `reward_amount`. Late claimers fail, and since `withdraw` requires `reward_claimed` after finalization (exit.rs:33), their stake is frozen. Before finalization, `remove_weight` (exit.rs:35) can underflow and block withdrawal.\nVerification: confirmed by finding-verifier (source-level; no exploit test run, no toolchain).\n\n### F2\nSeverity: Medium\nLocation: program/src/instructions/exit.rs:33\nMechanism: After finalization, stake withdrawal depends on a successful reward claim. If `claim_reward` fails for any reason (an underfunded reward vault, as in F1, or a token account problem), the user's principal stays locked in the stake vault. Withdrawal should not depend on the reward payout.\n\n### F3\nSeverity: Medium\nLocation: program/src/instructions/position.rs:106\nMechanism: `extend_lock` (and `merge_positions`, line 136) are open until `ends_at`, while new stake closes at `starts_at`. Weight depends only on the remaining lock at the time of the call, not on time spent in the season. A user can watch the other weights and extend at the last moment to take the exact share they want. This is a sniping and fairness issue, and it makes the reward split manipulable.\n\n### F4\nSeverity: Medium\nLocation: program/src/instructions/exit.rs:35\nMechanism: Reward forfeiture is silent. A position withdrawn after its lock expires but before `finalize_season` (line 32) loses its reward, and the position account is closed. Locks as short as 7 days (state.rs:10) can end before `ends_at`, so the user can lose rewards by timing alone. Forfeited rewards also stay in the vault with no recovery path (see F5).\n\n### F5\nSeverity: Low\nLocation: program/src/instructions/season.rs:72\nMechanism: No instruction returns undistributed rewards to the funder. Rounding dust, forfeited rewards (F4), and the whole reward if `final_total_weight` is 0 (`pro_rata` returns 0, math.rs:27) stay in `reward_vault` permanently. `Season.authority` has no powers after creation.\n\n### F6\nSeverity: Low\nLocation: program/src/math.rs:11\nMechanism: Weight is computed once at the time of the call and never decays. `lock_weight` rounds down and uses `now` at each action, so `add_stake`, `extend_lock` and `merge_positions` give different weight for the same remaining lock. This makes the weight inconsistent between users.\n\n### F7\nSeverity: Info\nLocation: program/src/instructions/season.rs:14\nMechanism: `stake_mint` is chosen freely by the season creator, and only the legacy SPL Token program is supported. A season with a malicious or freezable mint can trap depositors' funds. This is a trust assumption on the season creator, and users should check the mint.\n\n## Design findings\n\n- Liveness: finalization is permissionless (season.rs:66), which is good. But exits are coupled to reward claims (F2).\n- Scalability: each season is a single hot account written by every opener (`total_weight`). It is fine at this scale, but concurrent writes serialize.\n- Centralization: none. There is no admin, upgrade authority beyond deployment, or oracle.\n\n## Coverage\n\nPatterns: root-of-trust clear (PDA seeds + has_one on all position accounts); identity-rejection n/a; untrusted-executor clear (finalize permissionless, season.rs:66); role-inversion n/a; lazy-loading clear; pay-as-you-act found (F1, total not updated on merge); divide-and-conquer clear (per-position PDAs); complexity-asymmetry n/a; commit-execution-split n/a; action-as-data n/a; virtual-execution n/a; one-way-state found (F3, F4); boundary-of-consent n/a (no slippage; amounts fixed); internal-oracle n/a; defensive-computation found (F6); fail-fast n/a; execution-layer-shift n/a; dependency-independency found (F2, F7).\n\nChecklist: arithmetic clear (checked ops; `capped * MAX_BOOST_BPS` cannot overflow u64); duplicate-accounts clear (merge checks source != target, position.rs:127); unsafe-and-panics clear (no unsafe; `weight - position.weight` at position.rs:113 is safe because of `.max`); reload-after-cpi n/a; token-2022 n/a (legacy Token only, F7); closing clear (Anchor `close`); seed-collisions clear (distinct seed prefixes); init-frontrun clear (seeds include the authority/owner); realloc n/a; authority-transfer n/a; signers-bumps-cpi clear (stored bumps, season PDA signs, exit.rs/mod.rs:40).\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c12a",
+      "dir": "evals\\c12a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: All buyers of a deal are kept in one bounded `Vec<Commitment>` inside the shared `Deal` account (`MAX_BUYERS = 100`), and `join_deal` adds an entry for free, so the list can be filled cheaply with throwaway wallets (or simply by real demand), after which no new buyer can join or commit and the deal cannot reach its minimum.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/state.rs lines 11-11\n- src/state.rs lines 36-41\n- src/state.rs lines 59-60\n- src/instructions/buyer.rs lines 10-35\n- src/instructions/buyer.rs lines 62-64\n- src/instructions/buyer.rs lines 107-107\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says the per-deal buyer list (`buyers` Vec, `MAX_BUYERS`) in the shared `Deal` account caps participation and can be filled by an attacker (cheap or free `join_deal` from many wallets), blocking real buyers (`DealFull`/`NotJoined`) or making deals fail. Recommending per-buyer PDAs is a plus but not required.\n- PASS: the finding says deals cannot hold enough buyers to reach their minimum (account size limit of the Vec) when it names the Vec in `Deal` as the cause.\n- FAIL: only \"linear search costs compute\" with no capacity, denial or griefing consequence.\n- FAIL: only that `join_deal` has no payment, without connecting it to the bounded shared list.\n- FAIL: merchant powers (cancel, claim), escrow accounting, or refund logic, all of which are correct.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: All buyers of a deal are kept in one bounded `Vec<Commitment>` inside the shared `Deal` account (`MAX_BUYERS = 100`), and `join_deal` adds an entry for free, so the list can be filled cheaply with throwaway wallets (or simply by real demand), after which no new buyer can join or commit and the deal cannot reach its minimum.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/state.rs lines 11-11\n- src/state.rs lines 36-41\n- src/state.rs lines 59-60\n- src/instructions/buyer.rs lines 10-35\n- src/instructions/buyer.rs lines 62-64\n- src/instructions/buyer.rs lines 107-107\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says the per-deal buyer list (`buyers` Vec, `MAX_BUYERS`) in the shared `Deal` account caps participation and can be filled by an attacker (cheap or free `join_deal` from many wallets), blocking real buyers (`DealFull`/`NotJoined`) or making deals fail. Recommending per-buyer PDAs is a plus but not required.\n- PASS: the finding says deals cannot hold enough buyers to reach their minimum (account size limit of the Vec) when it names the Vec in `Deal` as the cause.\n- FAIL: only \"linear search costs compute\" with no capacity, denial or griefing consequence.\n- FAIL: only that `join_deal` has no payment, without connecting it to the bounded shared list.\n- FAIL: merchant powers (cancel, claim), escrow accounting, or refund logic, all of which are correct.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.20761149999999998,
+            "judgeCostUsd": 0.012671999999999996,
+            "durationSeconds": 67,
+            "startedAt": "2026-10-28T20:47:05.871Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-8Z2dR2\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: group_buy (Anchor)\n\nScope: `program/src` (lib.rs, state.rs, instructions/buyer.rs, instructions/merchant.rs, instructions/mod.rs) plus `program/ARCHITECTURE.md`.\nNo Critical or High findings. Token flows (commit, refund, claim_proceeds) are guarded correctly: the escrow is a PDA owned by the deal, `address = deal.escrow` is enforced, refunds are single-use, and arithmetic is checked.\n\n## Findings\n\nSeverity: Medium\nLocation: program/src/instructions/buyer.rs:26\nMechanism: `join_deal` is free and permissionless, pushes a zero-unit entry into a Vec capped at 100, and nothing ever removes entries. An attacker with 100 throwaway wallets fills the list, so no real buyer can join or commit (`commit` requires a prior join) and the deal fails at its deadline.\nVerification: reviewed by the finding-verifier agent, which downgraded the finding from High to Medium. Funds are not at risk, because a failed deal refunds through `refund`. Not tested with an exploit test (no toolchain).\n\nSeverity: Medium\nLocation: program/src/instructions/merchant.rs:73\nMechanism: `create_deal` does not require `min_units <= MAX_BUYERS * max_units_per_buyer`. With the documented parameters (for example 2,000 units, minimum 1,000, limit 5 per buyer) at most 500 units can ever be committed. Such a deal can never succeed, and buyers' funds are tied up until the deadline.\nVerification: confirmed by the finding-verifier agent.\n\nSeverity: Medium\nLocation: program/src/instructions/merchant.rs:137\nMechanism: Only `deal.authority` can call `claim_proceeds`, and a succeeded deal cannot be refunded. If the merchant key is lost or the merchant stops cooperating, the escrow is locked forever. The authority cannot be rotated, and no one else can trigger settlement or pay out.\n\nSeverity: Low\nLocation: program/src/instructions/merchant.rs:48\nMechanism: The merchant chooses any SPL mint without an allow-list. A mint with a freeze authority, or a worthless mint, lets the merchant freeze buyer or escrow token accounts, or take real payment in a worthless token. This blocks refunds or claims for that deal.\n\n## Design findings\n\nSeverity: Medium\nLocation: program/src/state.rs:11\nMechanism: All buyers are stored in one `Vec<Commitment>` inside the single Deal account, capped at `MAX_BUYERS = 100`. Every buyer instruction writes this one hot account, and the deal's capacity is bounded by it. Per-buyer PDA accounts with a running total on the deal would remove both the cap and the squatting problem.\n\nSeverity: Info\nLocation: program/src/instructions/buyer.rs:27\nMechanism: The off-chain fulfilment service reads `buyers` after the claim. The list also holds zero-unit entries and refunded entries, so the service must filter on `units > 0` and `!refunded`. Otherwise it ships to non-buyers.\n\nSeverity: Info\nLocation: program/src/instructions/merchant.rs:52\nMechanism: Deal and escrow accounts are never closed. The merchant's rent deposit stays locked after the deal ends, and state grows without bound.\n\n## Coverage\n\nThe full 29-row pattern and checklist coverage table was not produced. The checks run were root-of-trust on each instruction's accounts, the arithmetic and refund-reuse review, and the executor, liveness and scalability review described above.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c12b",
+      "dir": "evals\\c12b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 11,
+            "costUsd": 0.1532841,
+            "judgeCostUsd": 0,
+            "durationSeconds": 47,
+            "startedAt": "2026-10-28T20:47:54.236Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-RkUfpL\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c19a",
+      "dir": "evals\\c19a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.1447965,
+            "judgeCostUsd": 0,
+            "durationSeconds": 47,
+            "startedAt": "2026-10-28T20:48:13.140Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-gyy7O3\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c19b",
+      "dir": "evals\\c19b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `claim` overwrites `affiliate.claimed` with the leaf's `earned_total` even when that total is lower than the current value, which `saturating_sub` hides. Proofs against older epoch roots stay valid. So an affiliate can roll the counter back with an older leaf, then claim the newer leaf again, and repeat to drain the vault. The counter has to move forward only: reject totals that are not above `claimed`.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 86-89\n- src/lib.rs lines 72-128\n- src/lib.rs lines 214-234\n- src/lib.rs lines 257-264\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `claimed` can decrease, for example because it is set to a lower `earned_total` from an older epoch or because `saturating_sub` plus the assignment lets the paid counter go back. It also explains that this allows paying the same earnings again (alternating old and new epoch proofs, double or repeated claims, vault drain).\n- PASS: the finding is framed as \"old epoch proofs can be replayed to reset `claimed`, then the newest proof pays again\". Recommending to accept only the latest epoch is fine if the reset or double-pay mechanism is stated.\n- FAIL: the finding only says \"old Merkle roots are never invalidated\" or \"add a nonce or claimed bitmap\" and does not explain how the paid counter goes back or how funds are paid twice.\n- FAIL: the finding only remarks that `saturating_sub` hides an underflow or is a style issue, without the rollback and re-payment consequence.\n- FAIL: findings about the authority publishing a malicious root (a trust assumption) are not this flaw.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `claim` overwrites `affiliate.claimed` with the leaf's `earned_total` even when that total is lower than the current value, which `saturating_sub` hides. Proofs against older epoch roots stay valid. So an affiliate can roll the counter back with an older leaf, then claim the newer leaf again, and repeat to drain the vault. The counter has to move forward only: reject totals that are not above `claimed`.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 86-89\n- src/lib.rs lines 72-128\n- src/lib.rs lines 214-234\n- src/lib.rs lines 257-264\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `claimed` can decrease, for example because it is set to a lower `earned_total` from an older epoch or because `saturating_sub` plus the assignment lets the paid counter go back. It also explains that this allows paying the same earnings again (alternating old and new epoch proofs, double or repeated claims, vault drain).\n- PASS: the finding is framed as \"old epoch proofs can be replayed to reset `claimed`, then the newest proof pays again\". Recommending to accept only the latest epoch is fine if the reset or double-pay mechanism is stated.\n- FAIL: the finding only says \"old Merkle roots are never invalidated\" or \"add a nonce or claimed bitmap\" and does not explain how the paid counter goes back or how funds are paid twice.\n- FAIL: the finding only remarks that `saturating_sub` hides an underflow or is a style issue, without the rollback and re-payment consequence.\n- FAIL: findings about the authority publishing a malicious root (a trust assumption) are not this flaw.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.19855570000000003,
+            "judgeCostUsd": 0.01917599999999999,
+            "durationSeconds": 58,
+            "startedAt": "2026-10-28T20:48:41.104Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-Nbk6KT\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: affiliate_rewards\n\n## Scope\nSingle Anchor 0.31.1 program, `program/src/lib.rs` (instructions: create_campaign, fund, publish_epoch, register, claim). SPL Token only. No toolchain run; no tests executed.\n\n## Summary\n1 Critical, 0 High, 2 Medium, 2 Low. The key issue is F-1: `claim` lets an affiliate lower their `claimed` counter with an old epoch and be paid again, which drains the vault.\n\n## Findings\n\n### F-1: `claimed` can be moved backwards by claiming against an older epoch\n\nSeverity: Critical\nLocation: program/src/lib.rs:89\nMechanism: `claim` accepts any epoch of the campaign and sets `affiliate.claimed = earned_total` unconditionally. Claiming with an older, smaller cumulative total lowers `claimed`, so the next claim with the newer total pays the difference again; looping this drains the vault.\n\nPattern: one-way-state\nScenario:\n1. Affiliate has leaf total 50 in epoch 0 and 100 in epoch 1.\n2. claim(epoch1, 100) pays 100, claimed=100.\n3. claim(epoch0, 50): owed=0, claimed=50.\n4. claim(epoch1, 100): owed=50 is paid. Repeat steps 3-4 until the vault is empty.\nTest: not attempted\nVerification: confirmed by verifier\nFix: Use `affiliate.claimed = affiliate.claimed.max(earned_total)`, or require `earned_total > claimed`. Optionally only accept the latest epoch.\n\n### F-2: Epoch roots are unconstrained and cannot be corrected or revoked\n\nSeverity: Medium\nLocation: program/src/lib.rs:45\nMechanism: The campaign authority publishes arbitrary roots with no cap tied to vault balance, and no instruction can revoke or replace a wrong root. A mistaken or malicious root pays out whatever it states, up to the vault balance, and stays claimable forever, since all old epochs stay valid.\n\nPattern: role-inversion\nScenario:\n1. Authority publishes a root with inflated totals for its own affiliate account.\n2. The affiliate claims and takes funds that other funders deposited.\nTest: not attempted\nFix: Add an epoch revocation or a challenge window, and use the latest epoch only. Document the trust in the authority.\n\n## Design findings\n\n### F-3: No authority rotation, and no way to recover or close funds\n\nSeverity: Medium\nLocation: program/src/lib.rs:18\nMechanism: `authority` is set once and is part of the campaign PDA seeds. If that key is lost, no more epochs can be published and affiliates cannot earn new rewards. Funds that nobody can claim stay in the vault forever.\n\nPattern: dependency-independency\nScenario:\n1. The authority key is lost.\n2. Publishing stops and the remaining vault balance is stuck.\nTest: not attempted\nFix: Add a two-step authority transfer, and an expiry or sweep path for unclaimed funds.\n\n### F-4: Vault solvency is never checked against published obligations\n\nSeverity: Low\nLocation: program/src/lib.rs:45\nMechanism: `publish_epoch` does not compare cumulative totals with the vault balance, and `total_claimed` is never used. Affiliates can end up with valid proofs that cannot be paid, and the first claimers win.\n\nPattern: fail-fast\nScenario:\n1. Roots promise more than the vault holds.\n2. Early claims drain the vault and later valid claims fail.\nTest: not attempted\nFix: Track total committed amounts in the root and check them against funding.\n\n### F-5: Mint freeze authority can freeze the vault\n\nSeverity: Low\nLocation: program/src/lib.rs:163\nMechanism: `create_campaign` accepts any mint without checking `freeze_authority`. The mint's freeze authority could freeze the vault and block all claims.\n\nPattern: dependency-independency\nScenario:\n1. A campaign is created with a freezable mint.\n2. The freeze authority freezes the vault and all claims fail.\nTest: not attempted\nFix: Reject mints that have a freeze authority, or document the risk.\n\n## Coverage\n\n| Item | Verdict | Evidence |\n|---|---|---|\n| root-of-trust | clear | campaign and affiliate PDAs, vault address = campaign.vault (lib.rs:173, 224, 228); epoch tied to campaign via has_one (lib.rs:218) |\n| identity-rejection | n/a | no allow/deny lists |\n| untrusted-executor | n/a | claims are permissionless per owner; no operator-only settlement |\n| role-inversion | found | F-2 |\n| lazy-loading | clear | per-affiliate claim against a cumulative total, no loops |\n| pay-as-you-act | n/a | no aggregate processing |\n| divide-and-conquer | clear | one account per affiliate and per epoch |\n| complexity-asymmetry | clear | proof loop is bounded by transaction size (lib.rs:134) |\n| commit-execution-split | n/a | no randomness or previewable outcome |\n| action-as-data | n/a | no stored actions |\n| virtual-execution | n/a | no deferred obligations |\n| one-way-state | found | F-1 |\n| boundary-of-consent | n/a | amounts are fixed by the proof |\n| internal-oracle | n/a | no internal price |\n| defensive-computation | n/a | no pricing; saturating_sub at lib.rs:88 |\n| fail-fast | found | F-4 |\n| execution-layer-shift | n/a | no other layer |\n| dependency-independency | found | F-3, F-5 |\n| checklist-arithmetic | clear | checked_add at lib.rs:53, 115 |\n| checklist-duplicate-accounts | clear | no two mutable accounts of the same type can be swapped harmfully |\n| checklist-unsafe-and-panics | clear | no unsafe or unwrap |\n| checklist-reload-after-cpi | clear | no account data is read after the CPI |\n| checklist-token-2022 | n/a | uses the SPL Token program only (`Program<Token>`) |\n| checklist-closing | n/a | no account closing |\n| checklist-seed-collisions | clear | distinct prefixes; leaf and node prefixes at lib.rs:8-9 |\n| checklist-init-frontrun | clear | PDAs keyed by authority/owner |\n| checklist-realloc | n/a | no realloc |\n| checklist-authority-transfer | found | F-3 |\n| checklist-signers-bumps-cpi | clear | stored bump used for signing (lib.rs:93-98); owner is a Signer (lib.rs:232) |\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c20a",
+      "dir": "evals\\c20a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.1604081,
+            "judgeCostUsd": 0,
+            "durationSeconds": 55,
+            "startedAt": "2026-10-28T20:49:00.194Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-lO1TJ3\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c20b",
+      "dir": "evals\\c20b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `resolve` only checks the `report` against the `reporter` account that the caller passes (`has_one = reporter`) and against the market's `event_id`. It never checks that `reporter` is `market.reporter`. Anyone can create a `Reporter` and a `Report` through `register_reporter`/`post_report`, so an attacker can settle any market with their own result and take the losing pool.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 173-180\n- src/lib.rs lines 78-92\n- src/lib.rs lines 13-35\n- src/lib.rs lines 121-140\n- src/lib.rs lines 231-231\n- src/lib.rs lines 43-43\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `resolve` (or its `Resolve` accounts) accepts a reporter or report that is not the one stored in `market.reporter`. Equivalent wordings also pass: \"reporter not bound to the market\", \"missing `address`/`has_one` between market and reporter\", \"any registered reporter's report can resolve any market\". The finding should also give the consequence: an attacker creates their own reporter, posts the result they want, and resolves the market to steal the pool.\n- PASS: the finding is framed as \"anyone can register as a reporter and resolve markets with their own reports\", as long as it says that `resolve` does not compare the reporter or report with the market.\n- FAIL: the finding only says that `register_reporter` or `post_report` should be permissioned or admin-only, and does not note the missing binding between the market and the reporter in `resolve`.\n- FAIL: generic advice such as \"validate oracle/report accounts\" or \"add more account checks\" that does not name the reporter–market relation.\n- FAIL: the finding only covers timing (resolving before the event, or reporters posting early) and not the unbound reporter.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `resolve` only checks the `report` against the `reporter` account that the caller passes (`has_one = reporter`) and against the market's `event_id`. It never checks that `reporter` is `market.reporter`. Anyone can create a `Reporter` and a `Report` through `register_reporter`/`post_report`, so an attacker can settle any market with their own result and take the losing pool.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 173-180\n- src/lib.rs lines 78-92\n- src/lib.rs lines 13-35\n- src/lib.rs lines 121-140\n- src/lib.rs lines 231-231\n- src/lib.rs lines 43-43\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `resolve` (or its `Resolve` accounts) accepts a reporter or report that is not the one stored in `market.reporter`. Equivalent wordings also pass: \"reporter not bound to the market\", \"missing `address`/`has_one` between market and reporter\", \"any registered reporter's report can resolve any market\". The finding should also give the consequence: an attacker creates their own reporter, posts the result they want, and resolves the market to steal the pool.\n- PASS: the finding is framed as \"anyone can register as a reporter and resolve markets with their own reports\", as long as it says that `resolve` does not compare the reporter or report with the market.\n- FAIL: the finding only says that `register_reporter` or `post_report` should be permissioned or admin-only, and does not note the missing binding between the market and the reporter in `resolve`.\n- FAIL: generic advice such as \"validate oracle/report accounts\" or \"add more account checks\" that does not name the reporter–market relation.\n- FAIL: the finding only covers timing (resolving before the event, or reporters posting early) and not the unbound reporter.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.2132269,
+            "judgeCostUsd": 0.02000399999999998,
+            "durationSeconds": 67,
+            "startedAt": "2026-10-28T20:49:38.980Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-gsuMLE\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: outcome_pools\n\n## Scope\n`program/src/lib.rs` (Anchor 0.31.1, single file). Instructions: register_reporter, post_report, create_market, place_stake, resolve, claim. No toolchain was run, so no exploit tests.\n\n## Summary\n1 Critical, 0 High, 2 Medium, 3 Low. The key issue is F-1: anyone can resolve any market with their own reporter.\n\n## Findings\n\n### F-1: resolve does not bind the report to the market's reporter\n\nSeverity: Critical\nLocation: src/lib.rs:177\nMechanism: `Resolve.reporter` is not checked against `market.reporter`, and `report` only has `has_one = reporter` against that caller-supplied account. An attacker registers their own reporter, posts a report for the market's event_id after close, and resolves the market to the side they staked on, then claims the whole pool.\n\nPattern: root-of-trust\nScenario:\n1. Attacker stakes on Yes before `closes_at`.\n2. After close, attacker calls `register_reporter` and `post_report(event_id, Yes)`.\n3. Attacker calls `resolve` with their own reporter and report. All checks pass (event_id matches, `posted_at >= closes_at`).\n4. Attacker calls `claim` and receives the losing side's stakes.\nTest: unconfirmed (no toolchain)\nVerification: confirmed by verifier\nFix: Add `constraint = reporter.key() == market.reporter` (or `address = market.reporter`) on `Resolve.reporter`, and derive `report` from seeds `[b\"report\", market.reporter, event_id]`.\n\n## Design findings\n\n### F-2: A single report per event can leave a market unresolvable\n\nSeverity: Medium\nLocation: src/lib.rs:85\nMechanism: `post_report` creates a PDA per (reporter, event) that cannot be replaced, and `resolve` rejects reports with `posted_at < closes_at`. A report posted early, or posted once for several markets with different close times, can never resolve some markets, which then sit until the 14-day refund. A wrong report can never be corrected.\n\nPattern: fail-fast\nScenario:\n1. Reporter posts the event result before a market's `closes_at`.\n2. `resolve` fails with `EarlyReport`, and the report cannot be re-posted.\n3. Funds stay locked for `RESOLVE_WINDOW`, then everyone is refunded.\nTest: not attempted\nFix: Allow the reporter to post a report with a fresh timestamp or per-market report, or drop the `posted_at` check in favour of an event-end time.\n\n### F-3: The market creator picks the reporter, mint and close time unchecked\n\nSeverity: Medium\nLocation: src/lib.rs:38\nMechanism: `create_market` accepts any reporter, any mint and any `closes_at`. A creator can name a reporter they control, or set `closes_at` after the event so the outcome is known, and then collect the pool. The mint can also have a freeze authority that freezes the vault. The reporter and close time are visible to stakers, so this is a trusted-role design issue.\n\nPattern: dependency-independency\nScenario:\n1. Creator registers a reporter and makes a market naming it.\n2. Users stake. The creator's reporter posts the result they want.\nTest: not attempted\nFix: Use an allow-listed or governance-chosen reporter set, require a freeze-authority-free mint, and bound `closes_at`.\n\n### F-4: Only one stake per user per market\n\nSeverity: Low\nLocation: src/lib.rs:163\nMechanism: The ticket PDA is seeded by (market, owner) and created with `init`, so a second `place_stake` fails. Users cannot top up or hedge, and a front-runner cannot block anyone except by staking from the same wallet.\n\nPattern: divide-and-conquer\nTest: not attempted\nFix: Use `init_if_needed` with a side check, or add a ticket index to the seeds.\n\n### F-5: Token-2022 and unusual mints are unsupported\n\nSeverity: Low\nLocation: src/lib.rs:150\nMechanism: Only the legacy Token program is accepted. Fee-on-transfer is not possible there, but the creator-chosen mint may be freezable (see F-3).\n\nPattern: checklist-token-2022\nTest: not attempted\nFix: Restrict mints to an allow list.\n\n### F-6: Payout rounding dust stays in the vault\n\nSeverity: Low\nLocation: src/lib.rs:252\nMechanism: Pro-rata payouts use floor division, so a few base units stay in the vault forever. Rounding favours the protocol and cannot be exploited.\n\nPattern: defensive-computation\nTest: not attempted\nFix: Let the creator sweep dust after all tickets are claimed, if desired.\n\n## Coverage\n\n| Item | Verdict | Evidence |\n|---|---|---|\n| root-of-trust | found | F-1 |\n| identity-rejection | n/a | no allow or deny lists |\n| untrusted-executor | clear | `resolve` and `claim` are permissionless, src/lib.rs:79 |\n| role-inversion | found | F-1, F-2 |\n| lazy-loading | n/a | no accruals or loops |\n| pay-as-you-act | n/a | pools updated in `place_stake`, src/lib.rs:67 |\n| divide-and-conquer | found | F-4 |\n| complexity-asymmetry | clear | no loops or growing data |\n| commit-execution-split | found | F-3 (close time unbounded) |\n| action-as-data | n/a | no stored actions |\n| virtual-execution | n/a | no deferred obligations |\n| one-way-state | clear | `winner` set once, src/lib.rs:84; ticket closed on claim, src/lib.rs:187 |\n| boundary-of-consent | n/a | stake amounts are exact |\n| internal-oracle | n/a | no derived prices |\n| defensive-computation | found | F-6 |\n| fail-fast | found | F-2 |\n| execution-layer-shift | n/a | no rollup |\n| dependency-independency | found | F-3 |\n| checklist-arithmetic | clear | checked_add / u128 math, src/lib.rs:67, 252 |\n| checklist-duplicate-accounts | clear | no two mutable accounts of the same type |\n| checklist-unsafe-and-panics | clear | no unsafe, no unwraps |\n| checklist-reload-after-cpi | clear | no reads after CPI |\n| checklist-token-2022 | found | F-5 |\n| checklist-closing | clear | `close = owner` with has_one, src/lib.rs:187 |\n| checklist-seed-collisions | clear | distinct seed prefixes |\n| checklist-init-frontrun | clear | PDAs keyed to the creator, so there is no frontrun |\n| checklist-realloc | n/a | no realloc |\n| checklist-authority-transfer | n/a | no authority transfer |\n| checklist-signers-bumps-cpi | clear | market PDA signs the vault transfer with stored bump, src/lib.rs:108 |\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c24a",
+      "dir": "evals\\c24a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: Only `pool.authority` can call `close_epoch`, and the deployment describes that key as the team's keeper on the team's server. `withdraw` requires the request's epoch to be closed. So every exit depends on one operator key and server: if the keeper stops, `pool.epoch` never advances and unstaked funds stay locked. Epoch closing should be open to anyone once the time has passed, with a reward for the caller.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 191-196\n- src/lib.rs lines 104-124\n- src/lib.rs lines 78-102\n- ARCHITECTURE.md lines 6-6\n- ARCHITECTURE.md lines 3-3\n- src/lib.rs lines 201-201\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that advancing or closing the epoch (`close_epoch`) is restricted to the authority or operator, or depends on the team's keeper, and that `withdraw` therefore depends on it. If that key or service is unavailable, users cannot withdraw (liveness failure, funds locked). A recommendation to make `close_epoch` permissionless after `epoch_length`, ideally with a fee or tip for the caller, is expected but not required.\n- PASS: the finding is framed as centralization or censorship (\"the authority can stop withdrawals by never closing epochs\"), as long as it names `close_epoch` gating `withdraw`.\n- FAIL: generic remarks such as \"admin key is a single point of failure\" or \"consider a multisig\" that do not tie the authority to `close_epoch` and locked withdrawals.\n- FAIL: the finding only questions the cooldown semantics or epoch timing (for example \"requests made late in an epoch unlock early\") without the dependency on the operator.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: Only `pool.authority` can call `close_epoch`, and the deployment describes that key as the team's keeper on the team's server. `withdraw` requires the request's epoch to be closed. So every exit depends on one operator key and server: if the keeper stops, `pool.epoch` never advances and unstaked funds stay locked. Epoch closing should be open to anyone once the time has passed, with a reward for the caller.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 191-196\n- src/lib.rs lines 104-124\n- src/lib.rs lines 78-102\n- ARCHITECTURE.md lines 6-6\n- ARCHITECTURE.md lines 3-3\n- src/lib.rs lines 201-201\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that advancing or closing the epoch (`close_epoch`) is restricted to the authority or operator, or depends on the team's keeper, and that `withdraw` therefore depends on it. If that key or service is unavailable, users cannot withdraw (liveness failure, funds locked). A recommendation to make `close_epoch` permissionless after `epoch_length`, ideally with a fee or tip for the caller, is expected but not required.\n- PASS: the finding is framed as centralization or censorship (\"the authority can stop withdrawals by never closing epochs\"), as long as it names `close_epoch` gating `withdraw`.\n- FAIL: generic remarks such as \"admin key is a single point of failure\" or \"consider a multisig\" that do not tie the authority to `close_epoch` and locked withdrawals.\n- FAIL: the finding only questions the cooldown semantics or epoch timing (for example \"requests made late in an epoch unlock early\") without the dependency on the operator.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.21805070000000004,
+            "judgeCostUsd": 0.02136600000000001,
+            "durationSeconds": 90,
+            "startedAt": "2026-10-28T20:49:55.672Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-x8QzNf\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: points_staking\n\n## Scope\nSingle Anchor program `program/src/lib.rs` plus `program/ARCHITECTURE.md`. Instructions reviewed: create_pool, open_account, stake, request_unstake, withdraw, close_epoch. Off-chain points engine and keeper are out of scope, but their described behaviour was treated as part of the design.\n\n## Summary\n0 Critical, 0 High, 2 Medium, 2 Low, 1 Info. Account validation is sound: PDA seeds, `has_one`, `address = pool.vault` and checked arithmetic are all in place. The main issue is that unstake withdrawals depend on a single team-run keeper calling `close_epoch`.\n\n## Findings\n\n### F-1: Withdrawals depend on an authority-only close_epoch\n\nSeverity: Medium\nLocation: src/lib.rs:193\nMechanism: `close_epoch` is the only way to advance `pool.epoch` and only `pool.authority` can call it, while `withdraw` requires `pool.epoch > request.epoch` (lib.rs:81). If the keeper stops or withholds, or the operator key is lost, every pending unstake (already removed from `staked` and `total_staked`) stays locked, with no rotation or other exit.\n\nPattern: untrusted-executor\nScenario:\n1. User calls `request_unstake` in epoch N.\n2. The keeper goes offline or the operator wallet is lost.\n3. `withdraw` fails with `EpochNotClosed` indefinitely.\nTest: not attempted\nVerification: downgraded by verifier from High: needs the team's own key to fail or withhold, the authority cannot steal funds, and the freeze ends when the keeper resumes; it is permanent only if the key is lost.\nFix: Make `close_epoch` permissionless once `now >= ends_at` (drop the authority check). The instruction only acts as a timer and event emitter.\n\n### F-2: Unbonding does not impose a real delay or lock\n\nSeverity: Low\nLocation: src/lib.rs:81\nMechanism: A request can be withdrawn as soon as the current epoch closes, which can be seconds after the request, and stake has no minimum lock. Because the off-chain engine credits points from balances at close, a staker can deposit just before the predictable `close_epoch` call and earn a full epoch of points.\n\nPattern: boundary-of-consent\nScenario:\n1. The keeper closes epochs on a known schedule.\n2. The attacker stakes shortly before `epoch_started_at + epoch_length`.\n3. The engine credits a full epoch, and the attacker unstakes in the next epoch.\nTest: not attempted\nVerification: self-checked; no High/Critical verifier needed\nFix: Have the engine use time-weighted balances, or enforce a minimum stake duration on chain.\n\n## Design findings\n\n### F-3: Single operator key with no rotation or recovery\n\nSeverity: Medium\nLocation: src/lib.rs:19\nMechanism: `pool.authority` is set once at creation and is both the PDA seed and the only `close_epoch` signer, so it cannot be rotated, multisig-replaced or recovered. One compromised or lost wallet halts epoch closing for the pool, and a compromised key can stall the points engine's input.\n\nPattern: dependency-independency\nScenario:\n1. The operator wallet is lost or compromised.\n2. No instruction can change `authority`.\n3. The pool is stuck, and new pools need a new authority and mint pair.\nTest: not attempted\nVerification: self-checked; Medium, no verifier needed\nFix: Add a two-step authority transfer, and make `close_epoch` permissionless (see F-1).\n\n### F-4: Only one pending unstake request per user\n\nSeverity: Low\nLocation: src/lib.rs:170\nMechanism: The `Unbonding` PDA is seeded only by pool and owner, so a second `request_unstake` fails until the first is withdrawn. Combined with F-1, a user cannot unstake further while epoch closing is stalled.\n\nPattern: divide-and-conquer\nScenario:\n1. User requests an unstake and cannot withdraw it yet.\n2. A second `request_unstake` fails because the PDA already exists.\nTest: not attempted\nVerification: self-checked\nFix: Seed requests with an index or the epoch, or allow topping up an existing request.\n\n### F-5: Points depend on events only\n\nSeverity: Info\nLocation: src/lib.rs:115\nMechanism: Per-epoch totals exist only as an emitted event, not in account state. If RPC or indexer logs are lost, closed-epoch totals cannot be reconstructed on chain.\n\nPattern: dependency-independency\nScenario:\n1. The indexer misses an `EpochClosed` event.\n2. The totals for that epoch cannot be recovered from account state.\nTest: not attempted\nVerification: self-checked\nFix: Store a per-epoch snapshot account or a cumulative counter.\n\n## Coverage\n\n| Item | Verdict | Evidence |\n|---|---|---|\n| root-of-trust | clear | pool, staker and request PDAs are seeded (lib.rs:129,143,170); vault is checked with `address = pool.vault` (lib.rs:156,182); `has_one` ties the accounts together |\n| identity-rejection | n/a | no allow or deny lists |\n| untrusted-executor | found | F-1 |\n| role-inversion | n/a | no operator-pushed data |\n| lazy-loading | n/a | no accrual in the program; rewards are off chain |\n| pay-as-you-act | clear | `total_staked` is updated on both stake and unstake (lib.rs:56,67) |\n| divide-and-conquer | found | F-4 (per-user partitions otherwise fine) |\n| complexity-asymmetry | n/a | no loops or user-sized data |\n| commit-execution-split | n/a | no randomness or previewable outcome |\n| action-as-data | clear | unbonding request is closed on withdraw (lib.rs:180), so it cannot run twice |\n| virtual-execution | n/a | obligations are paid from the vault at withdraw |\n| one-way-state | clear | epoch only increases (lib.rs:121); request is closed on withdraw (lib.rs:180) |\n| boundary-of-consent | found | F-2 |\n| internal-oracle | n/a | no derived prices |\n| defensive-computation | n/a | no valuation or rounding |\n| fail-fast | n/a | no external data |\n| execution-layer-shift | n/a | no rollup or delegation |\n| dependency-independency | found | F-3, F-5 |\n| checklist-arithmetic | clear | checked_add/checked_sub throughout (lib.rs:54-67,110-121) |\n| checklist-duplicate-accounts | clear | no instruction takes two mutable accounts of the same type that could alias |\n| checklist-unsafe-and-panics | clear | no unsafe, unwrap or indexing |\n| checklist-reload-after-cpi | clear | no account data is read after the token CPIs |\n| checklist-token-2022 | clear | `Program<Token>` (lib.rs:136,161) accepts only the classic token program |\n| checklist-closing | clear | `close = owner` on request (lib.rs:180) |\n| checklist-seed-collisions | clear | distinct prefixes (pool, vault, staker, unbonding) with fixed-size key seeds |\n| checklist-init-frontrun | clear | pool seeds include the authority (lib.rs:129), so no one else can take the address |\n| checklist-realloc | n/a | no realloc |\n| checklist-authority-transfer | found | F-3 |\n| checklist-signers-bumps-cpi | clear | owner is a Signer for stake, unstake and withdraw; stored bump used for vault signer seeds (lib.rs:83-89) |\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "c24b",
+      "dir": "evals\\c24b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.1799157,
+            "judgeCostUsd": 0,
+            "durationSeconds": 65,
+            "startedAt": "2026-10-28T20:50:46.281Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-uN14oS\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 14,
+    "casesPassed": 14,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

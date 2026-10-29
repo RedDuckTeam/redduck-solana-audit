@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T17:02:59.980Z",
+  "durationSeconds": 77,
+  "costUsd": 0.18251209999999998,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "caseFilter": "c20b",
+    "threshold": 0,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c20b",
+      "dir": "evals\\c20b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `resolve` only checks the `report` against the `reporter` account that the caller passes (`has_one = reporter`) and against the market's `event_id`. It never checks that `reporter` is `market.reporter`. Anyone can create a `Reporter` and a `Report` through `register_reporter`/`post_report`, so an attacker can settle any market with their own result and take the losing pool.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 172-179\n- src/lib.rs lines 78-91\n- src/lib.rs lines 13-35\n- src/lib.rs lines 120-139\n- src/lib.rs lines 230-230\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `resolve` (or its `Resolve` accounts) accepts a reporter or report that is not the one stored in `market.reporter`. Equivalent wordings also pass: \"reporter not bound to the market\", \"missing `address`/`has_one` between market and reporter\", \"any registered reporter's report can resolve any market\". The finding should also give the consequence: an attacker creates their own reporter, posts the result they want, and resolves the market to steal the pool.\n- PASS: the finding is framed as \"anyone can register as a reporter and resolve markets with their own reports\", as long as it says that `resolve` does not compare the reporter or report with the market.\n- FAIL: the finding only says that `register_reporter` or `post_report` should be permissioned or admin-only, and does not note the missing binding between the market and the reporter in `resolve`.\n- FAIL: generic advice such as \"validate oracle/report accounts\" or \"add more account checks\" that does not name the reporter–market relation.\n- FAIL: the finding only covers timing (resolving before the event, or reporters posting early) and not the unbound reporter.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `resolve` only checks the `report` against the `reporter` account that the caller passes (`has_one = reporter`) and against the market's `event_id`. It never checks that `reporter` is `market.reporter`. Anyone can create a `Reporter` and a `Report` through `register_reporter`/`post_report`, so an attacker can settle any market with their own result and take the losing pool.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/lib.rs lines 172-179\n- src/lib.rs lines 78-91\n- src/lib.rs lines 13-35\n- src/lib.rs lines 120-139\n- src/lib.rs lines 230-230\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that `resolve` (or its `Resolve` accounts) accepts a reporter or report that is not the one stored in `market.reporter`. Equivalent wordings also pass: \"reporter not bound to the market\", \"missing `address`/`has_one` between market and reporter\", \"any registered reporter's report can resolve any market\". The finding should also give the consequence: an attacker creates their own reporter, posts the result they want, and resolves the market to steal the pool.\n- PASS: the finding is framed as \"anyone can register as a reporter and resolve markets with their own reports\", as long as it says that `resolve` does not compare the reporter or report with the market.\n- FAIL: the finding only says that `register_reporter` or `post_report` should be permissioned or admin-only, and does not note the missing binding between the market and the reporter in `resolve`.\n- FAIL: generic advice such as \"validate oracle/report accounts\" or \"add more account checks\" that does not name the reporter–market relation.\n- FAIL: the finding only covers timing (resolving before the event, or reporters posting early) and not the unbound reporter.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.18251209999999998,
+            "judgeCostUsd": 0.016062,
+            "durationSeconds": 77,
+            "startedAt": "2026-10-28T17:03:00.063Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-vHFT44\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: outcome_pools\n\nScope: program/src/lib.rs (Anchor 0.31.1). No Solana toolchain was used, so no exploit test was run. The Critical finding was reviewed by an independent verifier and confirmed.\n\n## Findings\n\n### F1\nSeverity: Critical\nLocation: program/src/lib.rs:176\nMechanism: `Resolve` never checks that `reporter` equals `market.reporter`. `market.reporter` is stored at line 43 and never read. Anyone can register their own reporter, post a report with the same `event_id` and any result, and call `resolve` right after `closes_at`. That fixes the winner to the attacker's choice, and the attacker then claims the pools.\nVerification: confirmed by the finding-verifier. Not run as a test (no toolchain).\n\n### F2\nSeverity: Medium\nLocation: program/src/lib.rs:24\nMechanism: `post_report` has no time check, and a report cannot be amended or removed (one report per reporter per event). A reporter can post a result before the event ends, or post a wrong one. `resolve` accepts it from `closes_at`, which is before the event starts, and `winner` is then permanent.\n\n### F3\nSeverity: Medium\nLocation: program/src/lib.rs:38\nMechanism: The market creator picks the reporter (line 43), and a creator can use their own reporter. A creator can stake on one side and then settle the market with their own report. Users have no on-chain way to tell a trustworthy reporter from a self-registered one (`register_reporter`, line 14, is permissionless). `closes_at` also has no upper bound, so stakes can be locked for an arbitrarily long time.\n\n### F4\nSeverity: Low\nLocation: program/src/lib.rs:162\nMechanism: The ticket PDA is seeded only by market and owner, so each wallet can stake once per market. A second `place_stake` fails because the account already exists. A user cannot top up or hedge on the other side, except by using another wallet.\n\n### F5\nSeverity: Low\nLocation: program/src/lib.rs:146\nMechanism: The mint is unrestricted. A mint with a freeze authority can freeze the vault and block all claims. Only the legacy Token program is accepted, so Token-2022 mints are not supported.\n\n### F6\nSeverity: Info\nLocation: program/src/lib.rs:186\nMechanism: `claim` requires the owner's signature, so nobody else can settle a ticket for the owner. Funds stay safe, but they can be locked up if a user loses their key. The single reporter per market (line 43) is a liveness dependency. If it never reports, users wait 14 days (line 7) for a refund. There is no way to rotate a reporter's authority.\n\n## Design findings\n\n- Centralization and liveness: settlement depends on a single reporter chosen by the creator (F1, F2, F3).\n- There is no dispute or correction path after `resolve` (line 87). Resolution is one-way.\n\n## Coverage\n\n| Item | Verdict |\n|---|---|\n| root-of-trust | found (F1) |\n| role-inversion | found (F2, F3) |\n| one-way-state | found (F2) |\n| fail-fast | found (F2) |\n| dependency-independency | found (F6) |\n| untrusted-executor | clear (resolve and claim need no admin; lines 79, 94) |\n| boundary-of-consent | n/a (fixed amounts, no computed rate) |\n| baseline: arithmetic | clear (checked_add at line 67; u128 math at line 251) |\n| baseline: duplicate accounts and closing | clear (ticket closed at line 186 and cannot be reused) |\n| other patterns | n/a (no oracle, loops, or randomness) |\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

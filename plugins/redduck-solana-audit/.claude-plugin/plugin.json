@@ -1,0 +1,13 @@
+{
+  "name": "redduck-solana-audit",
+  "version": "0.1.0",
+  "description": "Architecture-level security review of Solana programs (Anchor, native, Pinocchio) built on 18 design patterns distilled from the top Solana protocols, plus a compact checklist of classic Solana bug classes.",
+  "author": {
+    "name": "RedDuck",
+    "url": "https://redduck.io"
+  },
+  "homepage": "https://github.com/RedDuckTeam/redduck-solana-audit",
+  "repository": "https://github.com/RedDuckTeam/redduck-solana-audit",
+  "license": "MIT",
+  "keywords": ["solana", "anchor", "pinocchio", "security", "audit", "rust", "smart-contracts"]
+}

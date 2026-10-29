@@ -1,0 +1,650 @@
+[
+  {
+    "evalId": "c19a",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 75,
+    "costUsd": 0.1948192,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19a",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 72,
+    "costUsd": 0.1987015,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19a",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 12,
+    "durationSeconds": 48,
+    "costUsd": 0.19219609999999998,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19a",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 30,
+    "costUsd": 0.0841736,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19a",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 33,
+    "costUsd": 0.08704160000000001,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19a",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 31,
+    "costUsd": 0.0847325,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19a/without-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 69,
+    "costUsd": 0.19890249999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 0.6666666666666666,
+    "turns": 4,
+    "durationSeconds": 75,
+    "costUsd": 0.23037280000000002,
+    "graders": {
+      "canary": true,
+      "found": false,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 74,
+    "costUsd": 0.20982209999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 41,
+    "costUsd": 0.0918174,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 33,
+    "costUsd": 0.09508230000000002,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 44,
+    "costUsd": 0.09826139999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c19b/without-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 65,
+    "costUsd": 0.2011453,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 3,
+    "durationSeconds": 97,
+    "costUsd": 0.2647494,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 84,
+    "costUsd": 0.25797040000000004,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 36,
+    "costUsd": 0.09801080000000001,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 45,
+    "costUsd": 0.09786679999999999,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20a",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 66,
+    "costUsd": 0.0975808,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20a/without-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 81,
+    "costUsd": 0.22960819999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 60,
+    "costUsd": 0.20480939999999997,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 69,
+    "costUsd": 0.21964930000000002,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 34,
+    "costUsd": 0.0979556,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 37,
+    "costUsd": 0.09922339999999999,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 5,
+    "durationSeconds": 52,
+    "costUsd": 0.09897049999999999,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c20b/without-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 86,
+    "costUsd": 0.22378559999999997,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 85,
+    "costUsd": 0.21286739999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 61,
+    "costUsd": 0.18083439999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 31,
+    "costUsd": 0.10059079999999998,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 60,
+    "costUsd": 0.1123800000000001,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 48,
+    "costUsd": 0.10130000000000008,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24a/without-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 8,
+    "durationSeconds": 84,
+    "costUsd": 0.2030299,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/with-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "with",
+    "run": "with-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 8,
+    "durationSeconds": 56,
+    "costUsd": 0.16189389999999998,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/with-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "with",
+    "run": "with-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 8,
+    "durationSeconds": 64,
+    "costUsd": 0.1757959,
+    "graders": {
+      "canary": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/with-3.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 44,
+    "costUsd": 0.1103291,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/without-1.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 40,
+    "costUsd": 0.1019919,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/without-2.md",
+    "source": "g1-sonnet.json"
+  },
+  {
+    "evalId": "c24b",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 6,
+    "durationSeconds": 42,
+    "costUsd": 0.10733190000000001,
+    "graders": {
+      "canary": true,
+      "report-exists": true
+    },
+    "report": "results/g1-sonnet/reports/c24b/without-3.md",
+    "source": "g1-sonnet.json"
+  }
+]

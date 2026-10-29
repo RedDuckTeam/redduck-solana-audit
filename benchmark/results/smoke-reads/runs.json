@@ -1,0 +1,78 @@
+[
+  {
+    "evalId": "c03b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 75,
+    "costUsd": 0.20563710000000002,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/smoke-reads/reports/c03b/with-1.md",
+    "source": "smoke-reads-c03b.json"
+  },
+  {
+    "evalId": "c09b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 90,
+    "costUsd": 0.25599140000000004,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/smoke-reads/reports/c09b/with-1.md",
+    "source": "smoke-reads-c09b.json"
+  },
+  {
+    "evalId": "c12a",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 74,
+    "costUsd": 0.21956290000000006,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/smoke-reads/reports/c12a/with-1.md",
+    "source": "smoke-reads-c12a.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "with",
+    "run": "with-1",
+    "model": "claude-sonnet-5-5",
+    "error": null,
+    "score": 1,
+    "turns": 2,
+    "durationSeconds": 67,
+    "costUsd": 0.21327870000000002,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": true
+    },
+    "report": "results/smoke-reads/reports/c20b/with-1.md",
+    "source": "smoke-reads-c20b.json"
+  }
+]

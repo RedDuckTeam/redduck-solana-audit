@@ -1,0 +1,179 @@
+{
+  "models": {
+    "claude-sonnet-5-5": {
+      "all": {
+        "cases": 3,
+        "recallWith": 1,
+        "recallWithout": 1,
+        "ci": {
+          "low": 0,
+          "high": 0
+        }
+      },
+      "heldout": {
+        "cases": 0,
+        "recallWith": null,
+        "recallWithout": null,
+        "ci": null
+      },
+      "dev": {
+        "cases": 3,
+        "recallWith": 1,
+        "recallWithout": 1,
+        "ci": {
+          "low": 0,
+          "high": 0
+        }
+      },
+      "public": {
+        "cases": 0,
+        "recallWith": null,
+        "recallWithout": null,
+        "ci": null
+      },
+      "exploit": {
+        "cases": 2,
+        "recallWith": 1,
+        "recallWithout": 1,
+        "ci": {
+          "low": 0,
+          "high": 0
+        }
+      },
+      "design": {
+        "cases": 1,
+        "recallWith": 1,
+        "recallWithout": 1,
+        "ci": {
+          "low": 0,
+          "high": 0
+        }
+      },
+      "perCase": [
+        {
+          "caseId": "c19",
+          "role": "dev",
+          "cls": "exploit",
+          "with": true,
+          "without": true
+        },
+        {
+          "caseId": "c20",
+          "role": "dev",
+          "cls": "exploit",
+          "with": true,
+          "without": true
+        },
+        {
+          "caseId": "c24",
+          "role": "dev",
+          "cls": "design",
+          "with": true,
+          "without": true
+        }
+      ]
+    },
+    "claude-opus-5-5": {
+      "all": {
+        "cases": 3,
+        "recallWith": null,
+        "recallWithout": 1,
+        "ci": null
+      },
+      "heldout": {
+        "cases": 0,
+        "recallWith": null,
+        "recallWithout": null,
+        "ci": null
+      },
+      "dev": {
+        "cases": 3,
+        "recallWith": null,
+        "recallWithout": 1,
+        "ci": null
+      },
+      "public": {
+        "cases": 0,
+        "recallWith": null,
+        "recallWithout": null,
+        "ci": null
+      },
+      "exploit": {
+        "cases": 2,
+        "recallWith": null,
+        "recallWithout": 1,
+        "ci": null
+      },
+      "design": {
+        "cases": 1,
+        "recallWith": null,
+        "recallWithout": 1,
+        "ci": null
+      },
+      "perCase": [
+        {
+          "caseId": "c19",
+          "role": "dev",
+          "cls": "exploit",
+          "with": null,
+          "without": true
+        },
+        {
+          "caseId": "c20",
+          "role": "dev",
+          "cls": "exploit",
+          "with": null,
+          "without": true
+        },
+        {
+          "caseId": "c24",
+          "role": "dev",
+          "cls": "design",
+          "with": null,
+          "without": true
+        }
+      ]
+    }
+  },
+  "arms": [
+    {
+      "model": "claude-sonnet-5-5",
+      "arm": "with",
+      "runs": 18,
+      "formatFailures": 0,
+      "fp": 0,
+      "fpPending": 0,
+      "noise": 35,
+      "candidates": 3,
+      "meanFp": 0,
+      "meanNoise": 1.9444444444444444,
+      "formatFailureRate": 0
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "arm": "without",
+      "runs": 18,
+      "formatFailures": 0,
+      "fp": 6,
+      "fpPending": 0,
+      "noise": 49,
+      "candidates": 18,
+      "meanFp": 0.3333333333333333,
+      "meanNoise": 2.7222222222222223,
+      "formatFailureRate": 0
+    },
+    {
+      "model": "claude-opus-5-5",
+      "arm": "without",
+      "runs": 9,
+      "formatFailures": 0,
+      "fp": 0,
+      "fpPending": 0,
+      "noise": 11,
+      "candidates": 4,
+      "meanFp": 0,
+      "meanNoise": 1.2222222222222223,
+      "formatFailureRate": 0
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T16:26:12.564Z",
+  "durationSeconds": 77,
+  "costUsd": 0.1486482,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "with-without",
+    "modelOverride": "sonnet",
+    "judgeModel": "sonnet",
+    "caseFilter": "spike-a",
+    "threshold": 0,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "spike-a",
+      "dir": "evals\\spike-a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues. Write your findings to solana-audit-report.md in the current directory. For every finding write a block with these lines:\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <file>:<line>\nMechanism: <one sentence>\n\nThis run is also a harness test. After the audit, append a section \"Harness test\" to the report that answers:\n1. Try to read the file E:/work/RedDuck-Software/redduck-solana-audit/benchmark/spike-bait.txt and quote its first line, or write NOT READABLE with the error.\n2. Try to use the Agent tool with subagent_type \"redduck-solana-audit:finding-verifier\" to double-check one finding, and write WORKED or the exact error.\n3. List every file in the current working directory (recursively), including any stage-debug.txt content.",
+      "runsPerCase": 1,
+      "timeoutSeconds": 900,
+      "maxTurns": 40,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "report",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "The report contains at least one finding block with a \"Severity:\" line and a \"Location:\" line. RDSAF81C11F051B132899533",
+          "config": {
+            "criteria": "The report contains at least one finding block with a \"Severity:\" line and a \"Location:\" line. RDSAF81C11F051B132899533",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 9,
+            "costUsd": 0.08871090000000001,
+            "judgeCostUsd": 0.005495999999999999,
+            "durationSeconds": 35,
+            "startedAt": "2026-10-28T16:26:12.617Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-nEMVve\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: tip_jar (program/src/lib.rs)\n\nSeverity: Critical\nLocation: program/src/lib.rs:24\nMechanism: `owner` is an unchecked, non-signer account that is never compared to `jar.owner` (no `Signer`, no `has_one`), so anyone can call `withdraw` and move lamports out of any jar to any receiver.\n\nSeverity: Medium\nLocation: program/src/lib.rs:11\nMechanism: Lamports are debited with an unchecked `-=` and no rent-exempt floor check, so a caller can drain the jar below rent exemption (or to zero, which closes it) and a wrapped subtraction depends on the overflow-checks build setting; use `checked_sub`.\n\nSeverity: Low\nLocation: program/src/lib.rs:12\nMechanism: The credit to `receiver` uses an unchecked `+=` instead of `checked_add`, which relies on the build profile for overflow safety.\n\nSeverity: Info\nLocation: program/src/lib.rs:3\nMechanism: The program ID is a placeholder-looking address, and the program has no instruction to initialize or fund a `Jar`, so the account lifecycle is incomplete.\n\n## Harness test\n\n1. Read of E:/work/RedDuck-Software/redduck-solana-audit/benchmark/spike-bait.txt: NOT READABLE. Error: \"Permission to use Read has been denied because Claude Code is running in don't ask mode.\" I did not try to work around the denial.\n2. Agent with subagent_type \"redduck-solana-audit:finding-verifier\": WORKED. It confirmed the Critical finding (reachable by any caller, and the fix is `Signer` plus `has_one = owner`).\n3. Files in the current working directory (recursive):\n   - program/src/lib.rs\n   - stage-debug.txt\n   - solana-audit-report.md (this report)\n\n   stage-debug.txt content:\n   ```\n   pwd=/tmp/claude-eval-nEMVve/home/cwd\n   here=/e/work/RedDuck-Software/redduck-solana-audit/plugins/redduck-solana-audit/evals/spike-a\n   ```\n"
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 8,
+            "costUsd": 0.059937300000000006,
+            "judgeCostUsd": 0.005285999999999999,
+            "durationSeconds": 41,
+            "startedAt": "2026-10-28T16:26:47.744Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-53UHw2\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "report",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: tip_jar\n\n## Findings\n\n### 1\nSeverity: Critical\nLocation: program/src/lib.rs:24\nMechanism: The `owner` account is an unchecked, non-signer account that is never compared to `jar.owner`, so anyone can call `withdraw` and drain the jar.\n\n### 2\nSeverity: High\nLocation: program/src/lib.rs:11\nMechanism: `-= amount` on lamports is unchecked arithmetic with no rent-exempt minimum check, so a withdrawal can underflow or leave the jar below rent exemption and get it garbage-collected.\n\n### 3\nSeverity: Medium\nLocation: program/src/lib.rs:12\nMechanism: `+= amount` on the receiver's lamports is unchecked, and `receiver` is not constrained, so it could be the jar itself or any attacker-chosen account.\n\n### 4\nSeverity: Info\nLocation: program/src/lib.rs:3\nMechanism: The program ID is a placeholder-looking address (`Spk111...`) and should be confirmed before deployment.\n\n## Harness test\n\n1. Read of E:/work/RedDuck-Software/redduck-solana-audit/benchmark/spike-bait.txt: NOT READABLE. Error: \"Permission to use Read has been denied because Claude Code is running in don't ask mode.\"\n2. Agent with subagent_type \"redduck-solana-audit:finding-verifier\": Agent type 'redduck-solana-audit:finding-verifier' not found. Available agents: claude, Explore, general-purpose, Plan, statusline-setup\n3. Files in the current working directory (recursive):\n   - program/src/lib.rs\n   - stage-debug.txt (content below)\n   - solana-audit-report.md (this report, created by this run)\n\n   stage-debug.txt content:\n   ```\n   pwd=/tmp/claude-eval-53UHw2/home/cwd\n   here=/e/work/RedDuck-Software/redduck-solana-audit/plugins/redduck-solana-audit/evals/spike-a\n   ```\n"
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 1,
+        "passRateWithout": 1,
+        "delta": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0
+  }
+}

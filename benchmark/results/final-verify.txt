@@ -1,0 +1,29 @@
+verify (all): ok
+verify exit=0
+c01: check-ok / review-pass
+c02: check-ok / review-pass
+c03: check-ok / review-pass
+c04: check-ok / review-pass
+c05: check-ok / review-pass
+c06: check-ok / review-pass
+c07: check-ok / review-pass
+c08: check-ok / review-pass
+c09: check-ok / review-pass
+c10: check-ok / review-pass
+c11: check-ok / review-pass
+c12: check-ok / review-pass
+c13: check-ok / review-pass
+c19: check-ok / review-pass
+c20: check-ok / review-pass
+c24: check-ok / review-pass
+p03: check-skipped / review-pass
+p06: check-skipped / review-pass
+p08: check-skipped / review-pass
+p16: check-skipped / review-pass
+p18: check-skipped / review-pass
+p20: check-skipped / review-pass
+check-cases exit=0
+✔ Validation passed
+✔ Validation passed
+metrics self-test: ok
+0

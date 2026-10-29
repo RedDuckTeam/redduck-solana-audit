@@ -1,0 +1,15 @@
+{
+  "name": "redduck",
+  "owner": {
+    "name": "RedDuck",
+    "url": "https://redduck.io"
+  },
+  "description": "RedDuck plugins for Solana development and security review.",
+  "plugins": [
+    {
+      "name": "redduck-solana-audit",
+      "source": "./plugins/redduck-solana-audit",
+      "description": "Architecture-level security review of Solana programs built on 18 design patterns from the top Solana protocols."
+    }
+  ]
+}

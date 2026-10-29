@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T20:53:43.868Z",
+  "durationSeconds": 74,
+  "costUsd": 0.21956290000000006,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "caseFilter": "c12a",
+    "threshold": 0,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c12a",
+      "dir": "evals\\c12a",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: All buyers of a deal are kept in one bounded `Vec<Commitment>` inside the shared `Deal` account (`MAX_BUYERS = 100`), and `join_deal` adds an entry for free, so the list can be filled cheaply with throwaway wallets (or simply by real demand), after which no new buyer can join or commit and the deal cannot reach its minimum.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/state.rs lines 11-11\n- src/state.rs lines 36-41\n- src/state.rs lines 59-60\n- src/instructions/buyer.rs lines 10-35\n- src/instructions/buyer.rs lines 62-64\n- src/instructions/buyer.rs lines 107-107\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says the per-deal buyer list (`buyers` Vec, `MAX_BUYERS`) in the shared `Deal` account caps participation and can be filled by an attacker (cheap or free `join_deal` from many wallets), blocking real buyers (`DealFull`/`NotJoined`) or making deals fail. Recommending per-buyer PDAs is a plus but not required.\n- PASS: the finding says deals cannot hold enough buyers to reach their minimum (account size limit of the Vec) when it names the Vec in `Deal` as the cause.\n- FAIL: only \"linear search costs compute\" with no capacity, denial or griefing consequence.\n- FAIL: only that `join_deal` has no payment, without connecting it to the bounded shared list.\n- FAIL: merchant powers (cancel, claim), escrow accounting, or refund logic, all of which are correct.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: All buyers of a deal are kept in one bounded `Vec<Commitment>` inside the shared `Deal` account (`MAX_BUYERS = 100`), and `join_deal` adds an entry for free, so the list can be filled cheaply with throwaway wallets (or simply by real demand), after which no new buyer can join or commit and the deal cannot reach its minimum.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/state.rs lines 11-11\n- src/state.rs lines 36-41\n- src/state.rs lines 59-60\n- src/instructions/buyer.rs lines 10-35\n- src/instructions/buyer.rs lines 62-64\n- src/instructions/buyer.rs lines 107-107\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says the per-deal buyer list (`buyers` Vec, `MAX_BUYERS`) in the shared `Deal` account caps participation and can be filled by an attacker (cheap or free `join_deal` from many wallets), blocking real buyers (`DealFull`/`NotJoined`) or making deals fail. Recommending per-buyer PDAs is a plus but not required.\n- PASS: the finding says deals cannot hold enough buyers to reach their minimum (account size limit of the Vec) when it names the Vec in `Deal` as the cause.\n- FAIL: only \"linear search costs compute\" with no capacity, denial or griefing consequence.\n- FAIL: only that `join_deal` has no payment, without connecting it to the bounded shared list.\n- FAIL: merchant powers (cancel, claim), escrow accounting, or refund logic, all of which are correct.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.21956290000000006,
+            "judgeCostUsd": 0.015719999999999998,
+            "durationSeconds": 74,
+            "startedAt": "2026-10-28T20:53:44.089Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-yLOkPT\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: group_buy (Anchor)\n\n## Scope\nFramework: Anchor. Instructions: register_merchant, create_deal, cancel_deal, claim_proceeds, join_deal, commit, refund. Files read: all of `program/src` and `program/ARCHITECTURE.md`.\nSurfaces found: per-user list stored in one account, permissionless registration, escrow PDA payouts, and a time-based deal lifecycle. Not every pattern reference file was opened. The coverage table below is a condensed summary, not the full 29-row table.\nNo Solana toolchain was used, so nothing was exploit-tested.\n\n## Findings\n\nSeverity: Medium\nLocation: program/src/instructions/buyer.rs:26\nMechanism: `join_deal` is free and permissionless and appends a zero-unit slot to a buyer list capped at 100 (`state.rs:11`). Slots are never freed. Anyone with 100 throwaway keys, or the app's own page views (ARCHITECTURE.md: opening a deal page sends `join_deal`), can fill the list, so real buyers get `NotJoined` on `commit` and the deal fails. Funds are not lost because buyers who committed get refunded.\nVerification: finding-verifier confirmed reachability and downgraded it from High to Medium (availability only, principal is refundable).\n\nSeverity: Medium\nLocation: program/src/instructions/merchant.rs:73\nMechanism: `create_deal` never checks that `min_units` can be reached with `MAX_BUYERS (100) * max_units_per_buyer`. With the documented parameters (300 to 2,000 units, a minimum of about half, 1 to 5 units per buyer), many deals can never succeed even with no attacker. They always end in refunds.\nVerification: finding-verifier confirmed.\n\nSeverity: Low\nLocation: program/src/instructions/merchant.rs:128\nMechanism: The merchant can cancel any open deal before the deadline, even after the minimum is reached. This lets it back out of a sale that has succeeded, or hold buyers' funds until the cancel and refund steps are done. Buyers can still refund their principal.\n\nSeverity: Info\nLocation: program/src/instructions/merchant.rs:48\nMechanism: The merchant picks any SPL mint for a deal, and the program does not check it against an allow list. The operator's UI has to enforce USDC. A fake or freezable mint could trap buyer funds, because the mint authority can freeze the escrow or buyer accounts.\n\n## Design findings\n\nSeverity: Medium\nLocation: program/src/state.rs:59\nMechanism: The buyer list is stored inside the single `Deal` account with a hard cap of 100 entries. Every buyer action writes this one account and scans it linearly. This limits scale: the cap makes deals of 300 to 2,000 units practical only with large per-buyer limits, and it is what makes the slot-exhaustion attack above possible. Using a per-buyer PDA instead would remove the cap and the contention.\n\nSeverity: Info\nLocation: program/ARCHITECTURE.md:6\nMechanism: The operator's fulfilment service relies on the on-chain buyer list. The list also holds zero-unit joiners, so it must filter on `units > 0`. Fulfilment is an off-chain dependency and does not affect fund safety.\n\n## Checked and clear\n- Escrow signing: the escrow is tied to the deal by `address = deal.escrow` (buyer.rs:42, buyer.rs:93, merchant.rs:139), and the payout is signed by the deal PDA through `pay_from_escrow`.\n- Double claim: `claim_proceeds` requires `status == Open` and then sets `Claimed` (merchant.rs:151-155).\n- Double refund: `refunded` is set before the transfer (buyer.rs:108-109).\n- `claim_proceeds` and `refund` cannot both succeed, because their outcomes are mutually exclusive (state.rs:66-74).\n- Arithmetic is checked, and `create_deal` bounds `price * max_units` (merchant.rs:80-83).\n- Authority checks are present (`has_one = authority`). Merchant and deal PDAs use seeds.\n\n## Coverage summary\nFound: complexity-asymmetry / divide-and-conquer (buyer list cap), fail-fast (min_units reachability), boundary-of-consent (merchant cancel).\nClear: root-of-trust (PDAs and `address` constraints), one-way-state (status and refunded flags), checklist-arithmetic, checklist-duplicate-accounts, checklist-signers-bumps-cpi, checklist-closing.\nN/A: oracle, internal-oracle, defensive-computation, virtual-execution, execution-layer-shift, commit-execution-split, action-as-data, lazy-loading, pay-as-you-act, checklist-realloc, checklist-token-2022 (classic SPL token only), checklist-unsafe-and-panics, checklist-reload-after-cpi, checklist-seed-collisions, checklist-init-frontrun, checklist-authority-transfer, identity-rejection, untrusted-executor, role-inversion, dependency-independency.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

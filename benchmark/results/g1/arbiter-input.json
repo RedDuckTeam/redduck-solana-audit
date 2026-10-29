@@ -1,0 +1,202 @@
+[
+  {
+    "cid": "8868eb88fa89",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "The single  authority  publishes roots with no validation, timelock, cap or on-chain check against vault funds, and can publish a root granting itself (or any colluding affiliate) an inflated  earned total . It can then drain the entire vault immediately, so the program is fully custodial and trusts one key. Compromise of that key loses all funds."
+  },
+  {
+    "cid": "aa054876a3ec",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:148",
+    "mechanism": "create market  accepts any permissionlessly registered  Reporter  (line 14), and  post report  (line 24) verifies nothing about the event, so a creator registers their own reporter, stakes on one side, posts that side as the result, resolves, and claims the victims' pool."
+  },
+  {
+    "cid": "f806bdf78126",
+    "evalId": "c24b",
+    "program": "benchmark/fixtures/c24b/program",
+    "severity": "high",
+    "location": "src/lib.rs:121",
+    "mechanism": "close epoch  is permissionless and  stake / request unstake  have no warm-up or cool-down. An attacker can stake a large amount, call  close epoch  in the same transaction (once the epoch has ended), and then unstake. The  EpochClosed  event reports the inflated  total staked , and the off-chain points engine credits the attacker for an epoch they never held stake through. The attacker also picks which snapshot is emitted. There is no per-staker, per-epoch checkpoint on chain, so the engine cannot tell time-weighted stake from a flash stake."
+  },
+  {
+    "cid": "6654c3eecfdf",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "The campaign authority alone publishes Merkle roots, with no cap, timelock or check against vault balance or funded amount. A compromised or malicious authority can publish a root that assigns itself (or a sybil affiliate) an  earned total  equal to the whole vault and drain all funds that third parties deposited via  fund ."
+  },
+  {
+    "cid": "dd5bcd0ff8d8",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:38",
+    "mechanism": "Any creator can attach any self-registered reporter (registration at line 14 is permissionless) to a market. A malicious creator can register their own reporter, open a market, wait for stakes, then post whichever result they like and drain the pool. Settlement trust rests on one unvetted key, with no allowlist, no stake or bond, no dispute process and no multi-reporter quorum."
+  },
+  {
+    "cid": "3639798c317e",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:38",
+    "mechanism": "The doc says staking closes before the event starts, but nothing enforces it, and  post report  (line 24) never checks that the event has finished or that  posted at  is after  closes at . A creator, or a reporter they work with, can set  closes at  after the result is posted. The creator can then stake on the known winner and drain honest stakers' funds, and anyone can do the same when a report is posted before staking closes."
+  },
+  {
+    "cid": "2953c7bce6d2",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "publish epoch  lets the single campaign authority publish any root with no check against vault balance or the previous epoch's totals. A malicious or compromised authority can add a leaf for themselves with a huge  earned total  and drain every token that third parties deposited through the open  fund  instruction. There is no withdraw, so the risk is trust-only, with no on-chain limit."
+  },
+  {
+    "cid": "f93c77e0982b",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:220",
+    "mechanism": "claim  accepts any previously published epoch ( epoch  is only checked with  has one = campaign , and the doc comment at line 72 says this is intended), and published epochs can never be revoked, superseded or closed. If the authority publishes a corrected root that lowers or removes an affiliate's total (for example after fraud or a miscalculation), the affiliate can still claim against the older, more generous root."
+  },
+  {
+    "cid": "bb5439a9a4aa",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "The campaign authority alone chooses each epoch root and nothing validates it. There is no check against vault balance, no cap on cumulative totals, and no timelock or dispute path. A malicious or compromised authority can publish a root with a leaf for its own registered affiliate and claim every token in the vault, including third-party funds from the permissionless  fund ."
+  },
+  {
+    "cid": "7d75c06d7f77",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:43",
+    "mechanism": "The creator picks any  Reporter  for the market, and the reporter is the only source of truth. There is no dispute process, no staking or bonding, and no check that the reporter is independent. A creator can register their own reporter, open a market, stake, and post the result that pays them. Stakers must trust the creator and the reporter completely, and a wrong report cannot be corrected, because each reporter can post an event only once (line 134)."
+  },
+  {
+    "cid": "dbf5630d22cc",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:38",
+    "mechanism": "create market  only requires  closes at  to be in the future, with no upper bound. A creator can set  closes at  near  i64::MAX . Stakes are then locked forever, because  resolve  needs  now  = closes at  and the refund path in  claim  (line 99) needs  now  = closes at + RESOLVE WINDOW , which saturates to  i64::MAX ."
+  },
+  {
+    "cid": "aeb6801a1c20",
+    "evalId": "c24b",
+    "program": "benchmark/fixtures/c24b/program",
+    "severity": "high",
+    "location": "src/lib.rs:121",
+    "mechanism": "close epoch  is permissionless and only advances  epoch started at  by one  epoch length . If the epoch is overdue, anyone can close several epochs back to back in one transaction, and each  EpochClosed  event snapshots the same instantaneous  total staked . An attacker can stake a large amount, close N overdue epochs in the same transaction, and be credited by the points engine for N full epochs of stake they never held. Closing also needs no stake-time requirement, so just-in-time staking before any close is rewarded the same as holding for the whole epoch."
+  },
+  {
+    "cid": "8c9bb54e32b9",
+    "evalId": "c20b",
+    "program": "benchmark/fixtures/c20b/program",
+    "severity": "high",
+    "location": "src/lib.rs:56",
+    "mechanism": "place stake  only checks  closes at . Neither  post report  nor  resolve  requires the report to be posted at or after  closes at  ( report.posted at  is never checked). If the reporter posts before  closes at  (for example because the creator set  closes at  after the event ended, by mistake or on purpose), anyone can read the report and stake on the known winner with no risk, taking the losers' funds."
+  },
+  {
+    "cid": "3c444cae4c14",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "publish epoch  lets the authority publish any root with no cap against vault balance, and  claim  accepts every old epoch forever, so a wrong or malicious root can never be withdrawn. A malicious or compromised authority can publish a root granting itself the whole vault."
+  },
+  {
+    "cid": "53e332dce6ab",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "One  authority  key publishes arbitrary Merkle roots instantly. There is no timelock or challenge window ( published at  is stored but never used), no multisig, and no on-chain check of totals against funding. A compromised or malicious authority can publish a root that gives itself (or any address) the whole vault, including tokens deposited by third-party funders through  fund ."
+  },
+  {
+    "cid": "d70f8d548cd1",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:38",
+    "mechanism": "The market creator picks any reporter (line 43), and  register reporter  is permissionless. A creator can register their own reporter, open a market, attract stakers, and then post whichever result favors them. Settlement trusts a single party chosen by the creator, with no dispute, bond, quorum or allowlist."
+  },
+  {
+    "cid": "dd8b9d0de514",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "publish epoch  lets one signer post an arbitrary root that takes effect immediately ( published at  is recorded but never enforced). A malicious or compromised authority can publish a root that gives an address it controls the whole vault balance, including tokens added by third-party funders, and claim it in the same slot. There is no multisig, delay, cap per epoch, or check that earnings only grow."
+  },
+  {
+    "cid": "8aa07f134ecb",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "A single authority key publishes arbitrary Merkle roots with no cap, timelock or review. It can add a leaf for itself (or a sybil) with an  earned total  equal to the whole vault, then claim it. Affiliates and funders must trust this key completely, and the vault is not protected from it."
+  },
+  {
+    "cid": "6cbf0b1e17bc",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:45",
+    "mechanism": "publish epoch  lets  campaign.authority  publish any root with no timelock, cap or review, so a compromised or malicious authority can publish a root granting itself the entire vault and claim it; roots cannot be revoked once published."
+  },
+  {
+    "cid": "886a8233a612",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:24",
+    "mechanism": "post report  does not check the time. A reporter can publish a result before  closes at , or before the event has happened, and  resolve  (line 79) only checks  now  = closes at . Since staking closes before the event starts, a market can be resolved on a report posted before the event finished. A reporter who posts before staking closes lets others, or themselves, stake on the known winner.  Report.posted at  is stored but never used."
+  },
+  {
+    "cid": "55bc42760cd4",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:74",
+    "mechanism": "claim  accepts the root of any published epoch, and epochs can never be revoked or superseded. Leaves hold cumulative totals, so a root that is wrong, malicious or later corrected (for example after fraud is found and an affiliate's total is lowered) stays claimable. An affiliate can claim against the older, higher-value epoch forever. A bad root cannot be undone."
+  },
+  {
+    "cid": "41a9d7d6afc0",
+    "evalId": "c24b",
+    "program": "benchmark/fixtures/c24b/program",
+    "severity": "high",
+    "location": "src/lib.rs:121",
+    "mechanism": "close epoch  emits only an instantaneous  total staked , and  stake  (line 43) records no per-epoch or time-weighted balance. The off-chain engine reads current staker balances, so someone can stake a large amount just before  close epoch  (even in the same transaction) and be credited a full epoch of points. They can then request an unstake and withdraw after the next close, which dilutes honest stakers' points."
+  },
+  {
+    "cid": "8746b2930d4c",
+    "evalId": "c20a",
+    "program": "benchmark/fixtures/c20a/program",
+    "severity": "high",
+    "location": "src/lib.rs:79",
+    "mechanism": "resolve  never checks  report.posted at  against  market.closes at , and  post report  (line 24) does not check that the event has finished. A reporter can post a result before or during staking, and the report account is public. A market creator can also pick an  event id  that already has a report, so the outcome is known before anyone stakes. Insiders then stake on the known winner and drain the losing pool. Fix: require  report.posted at  = market.closes at , and bind each market to a report that did not exist when it was created."
+  },
+  {
+    "cid": "c4085660d475",
+    "evalId": "c19b",
+    "program": "benchmark/fixtures/c19b/program",
+    "severity": "high",
+    "location": "src/lib.rs:184",
+    "mechanism": "The  PublishEpoch  accounts struct only requires the one  authority  signer. The new root takes effect immediately: there is no timelock, dispute window, multisig, or check against the funded amount ( published at  is stored but never used). A compromised or malicious authority can publish a root with a leaf crediting itself the full vault balance and claim it in the next transaction, taking all funds that third parties deposited through  fund ."
+  },
+  {
+    "cid": "b712910292f1",
+    "evalId": "c19a",
+    "program": "benchmark/fixtures/c19a/program",
+    "severity": "high",
+    "location": "src/lib.rs:74",
+    "mechanism": "claim  accepts any epoch ever published, and there is no way to revoke or close an epoch. A root that is wrong or malicious (bad off-chain computation, key compromise) stays claimable forever, so it cannot be corrected, only out-published by cumulative totals that cannot lower already-claimed amounts."
+  }
+]

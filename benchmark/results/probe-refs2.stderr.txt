@@ -1,0 +1,3 @@
+Note: --scaffold runs each case's scaffold_script as you. Only use it on case files you (or your org) authored.
+⚠ kept C:\Users\kubar\AppData\Local\Temp\claude-eval-cE36zn: could NOT seal what the plugin under test wrote (directory modes do not restrict access on Windows) — everything in it except out/ and config/ may be agent-written, wherever it now sits (modes were closed as far as possible); read out/ if you need it, do not run git or anything that loads configuration from a working directory anywhere inside, and remove it (`Remove-Item -Recurse -Force -LiteralPath 'C:\Users\kubar\AppData\Local\Temp\claude-eval-cE36zn'`)
+Report: E:\work\RedDuck-Software\redduck-solana-audit\plugins\redduck-solana-audit\evals\results\2026-10-28T17-01-05-315Z\report.html

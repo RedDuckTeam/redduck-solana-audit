@@ -1,0 +1,173 @@
+[
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 65,
+    "costUsd": 0.2205306,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c19b/without-1.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 66,
+    "costUsd": 0.2156384,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c19b/without-2.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c19b",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 58,
+    "costUsd": 0.2113404,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c19b/without-3.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 57,
+    "costUsd": 0.24196259999999997,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c20b/without-1.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 60,
+    "costUsd": 0.2422866,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c20b/without-2.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c20b",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 5,
+    "durationSeconds": 63,
+    "costUsd": 0.2463326,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c20b/without-3.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-1",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 6,
+    "durationSeconds": 57,
+    "costUsd": 0.2278216,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c24a/without-1.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-2",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 6,
+    "durationSeconds": 66,
+    "costUsd": 0.22552240000000004,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c24a/without-2.md",
+    "source": "g1-opus-baseline.json"
+  },
+  {
+    "evalId": "c24a",
+    "arm": "without",
+    "run": "without-3",
+    "model": "claude-opus-5-5",
+    "error": null,
+    "score": 0.75,
+    "turns": 6,
+    "durationSeconds": 63,
+    "costUsd": 0.2444716,
+    "graders": {
+      "canary": true,
+      "found": true,
+      "report-exists": true,
+      "skill": false
+    },
+    "report": "results/g1-opus/reports/c24a/without-3.md",
+    "source": "g1-opus-baseline.json"
+  }
+]

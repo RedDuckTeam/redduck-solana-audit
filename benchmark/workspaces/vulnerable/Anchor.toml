@@ -1,0 +1,28 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+affiliate_rewards = "8KmXrw5wx1yocDY4A7mEPh2LRNdeH79spYZ5d3K1NRqL"
+commission_pool = "CAP44gWepUsGVbxT7V764u8odUHQHRMB1SYqBFHb354N"
+fx_corridor = "5FNKvRbHFoFToHKnPyDgDQBYyTH9f7JWDbZTaJ9ckzzU"
+gift_card = "B2H7JoyQHvc2LoFhMpV2GJ2zyvsV9zLmQF94HScDYenB"
+grants_council = "9ZnJZqrmbq7dPKGKYeYKtvR1C6Efgiw6EmmuX93Uhbhc"
+group_buy = "F39E4Pp7P8TanUDM57upYWiwzmR5eMchWXu6CXP9gNsh"
+launchpad = "BF3M3x7i4SPuqGJYjCPAYsZjczYda8MJp9C1J87Z6aY3"
+lending_desk = "4snwYzHWi7ffbzQmRGwkd7DSHgYPduBqVXgmfFfFcckg"
+loot_crate = "DURu2KAXJ8BcYTsW1K5CXbzL4uDndfrjEhqoVtqQc2HA"
+note_market = "EKgHChHvry5DxYcbiS8YFJDUy8BVHzjYiLGWTLhNmZaz"
+outcome_pools = "2THq8UQkjiYpdYDoCWxvsh3zeAShceAFzmb56SQ4ovyk"
+points_staking = "EU3C8W9eoQbFYWHvFiubw6A4Crka9v2tsrkxDcxqZWtn"
+season_locker = "BhUM6cVe5a98qXeYrnJiEv3DLBkp81oMpx62myP6XYLC"
+spend_card = "CSu8oFRh5eMXqj7n3MMGQbFcFRj8e89sa3vApigj9ynk"
+stake_credit = "3SDQyw9p4i9dHGxLAVf6JmVUP9q5QDCnGjsfkkxAVkXp"
+wager_arena = "BmBZTqedT9KLNDHWUQUhsBSDe425cxsRnYJqfRdAB2ks"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"

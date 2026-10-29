@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T20:53:43.853Z",
+  "durationSeconds": 75,
+  "costUsd": 0.20563710000000002,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "caseFilter": "c03b",
+    "threshold": 0,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c03b",
+      "dir": "evals\\c03b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `withdraw` computes the notes to burn for a requested asset amount with floor division\n(`assets * total_notes / total_assets`). Once assets-per-note exceeds 1 (after\n`accrue_yield`), a small withdrawal truncates the burn to fewer notes than it is worth\n— and to zero when `assets * total_notes < total_assets` — so a user withdraws assets\nwithout paying the corresponding notes. The charge must round up (ceiling).\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/withdraw.rs lines 40-44\n- src/instructions/withdraw.rs lines 34-74\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - A hit must identify that the notes-to-burn computation in `withdraw` rounds in the\n  user's favour (floor instead of ceiling), letting a withdrawal cost too few notes (or\n  zero). Naming the exact `as u128 ... / total_assets` site, or the rounding direction,\n  is required.\n- A finding that only flags `deposit` or `redeem` rounding is a FAIL: those round down\n  correctly (against the user).\n- A finding that says \"use checked math\" or \"possible overflow\" without identifying the\n  rounding direction in `withdraw` is a FAIL; the math already uses checked `u128`.\n- Pointing at `accrue_yield` as the flaw is a FAIL; it is normal operation and a trusted\n  role.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.20563710000000002,
+            "judgeCostUsd": 0.011040000000000001,
+            "durationSeconds": 75,
+            "startedAt": "2026-10-28T20:53:44.079Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-fQlGS8\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana Audit Report: note_market\n\nScope: program/src (Anchor). Instructions: initialize_vault, open_position, deposit, accrue_yield, withdraw, redeem, close_position.\n\n## Findings\n\n### F1\nSeverity: High\nLocation: program/src/instructions/withdraw.rs:43\nMechanism: `notes_to_burn` is rounded down and never required to be > 0, so once yield makes a note worth more than one asset, any user (even with an empty, already-unlocked position) can withdraw `assets` below the note price while burning 0 notes, taking accrued yield from other holders; with a high ratio one call can take almost all yield.\nVerification: confirmed by finding-verifier. Fix: round notes up and `require!(notes_to_burn > 0)`.\n\n### F2\nSeverity: Medium\nLocation: program/src/instructions/accrue.rs:46\nMechanism: Yield is credited instantly to total_assets and the only lock is a 1-hour hold (state.rs:4), so an attacker can deposit just before a visible accrue_yield and withdraw an hour later, capturing a share of yield they did not earn.\n\n### F3\nSeverity: Medium\nLocation: program/src/instructions/initialize.rs:17\nMechanism: The vault PDA is seeded only by the asset mint and the first caller becomes `authority`, so anyone can front-run and squat the vault for a mint (a single vault per mint), permanently owning the authority role and blocking the intended operator.\n\n### F4\nSeverity: Low\nLocation: program/src/instructions/withdraw.rs:47\nMechanism: The lock check relies on `unlock_ts`, which `open_position` sets to 0 (open.rs:29). This is harmless on its own but is the reason F1 works with no deposit. A deposit also resets the lock for the whole position (deposit.rs:62).\n\n### F5\nSeverity: Low\nLocation: program/src/instructions/accrue.rs:16\nMechanism: The authority is fixed at initialization with no rotation or recovery. If the key is lost, yield can never be added again. If it is compromised, the attacker controls yield timing (see F2).\n\n### F6\nSeverity: Info\nLocation: program/src/instructions/deposit.rs:38\nMechanism: When total_notes hits 0, leftover total_assets (rounding dust) remains while the first new depositor is minted notes 1:1, so that dust is gifted to them. Accounting uses stored totals rather than the token balance, so direct donations do not inflate the share price.\n\n### F7\nSeverity: Info\nLocation: program/src/instructions/redeem.rs:33\nMechanism: redeem emits no event, unlike deposit and withdraw, so off-chain indexers cannot track redemptions.\n\n## Design findings\n\n### D1\nSeverity: Low\nLocation: program/src/instructions/deposit.rs:13\nMechanism: Every user instruction writes the single global Vault account, so all activity is serialized on one hot account (scalability limit). The program is also limited to the legacy SPL Token program and has no pause or emergency exit. A freeze authority on the mint could freeze vault_token and lock all funds.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

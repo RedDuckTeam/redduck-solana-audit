@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.312",
+  "startedAt": "2026-10-28T20:53:43.852Z",
+  "durationSeconds": 90,
+  "costUsd": 0.25599140000000004,
+  "partial": false,
+  "suite": {
+    "root": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit",
+    "ablation": "none",
+    "modelOverride": "claude-sonnet-5-5",
+    "judgeModel": "claude-sonnet-5-5",
+    "caseFilter": "c09b",
+    "threshold": 0,
+    "concurrency": 1,
+    "plugins": [
+      {
+        "name": "redduck-solana-audit",
+        "version": "0.1.0",
+        "path": "E:\\work\\RedDuck-Software\\redduck-solana-audit\\plugins\\redduck-solana-audit"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "c09b",
+      "dir": "evals\\c09b",
+      "source": "mixed",
+      "promptMarkdown": "Audit the Solana program in ./program for security issues.\n\nWrite your findings to solana-audit-report.md in the current directory. For every finding, write a block with these three lines:\n\nSeverity: <Critical|High|Medium|Low|Info>\nLocation: <path>:<line>\nMechanism: <what is wrong and how it can be abused, in one or two sentences>\n\nArchitecture problems count as findings too (for example liveness, centralization or scalability problems), not only bugs in a single line. If you find no issues, write \"No findings.\" in the report.\n\nWhen you are done, repeat the list of findings in your final message.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 1800,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "canary",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "trace",
+            "pattern": "RDSAF81C11F051B132899533",
+            "flags": "",
+            "match": "not_contains",
+            "arm": "both"
+          }
+        },
+        {
+          "name": "found",
+          "type": "llm",
+          "weight": 1,
+          "graderMarkdown": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `merge_positions` gives the target a recomputed weight. The merged amount at the later lock end can exceed the two old weights combined. It never applies that change to `Season.total_weight`, which the other weight-changing paths keep in sync. `finalize_season` snapshots the stale, too-low total. `claim_reward` then pays `reward_amount * weight / final_total_weight` against it, so the claims add up to more than the reward vault and the merger takes other holders' rewards.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/position.rs lines 121-125\n- src/instructions/position.rs lines 133-152\n- src/instructions/season.rs lines 65-77\n- src/instructions/exit.rs lines 58-76\n- src/state.rs lines 22-25\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that merging positions changes position weight without updating the season's total weight, or that the total can fall below the sum of position weights through merge. It must also say that rewards are then over-allocated or mis-distributed at claim or finalization.\n- PASS also if the finding is phrased as \"merge recomputes weight with the longer lock but `total_weight` is unchanged, so reward shares sum to more than 100%\".\n- FAIL: a finding that only says merge lets someone boost their weight or \"gain extra rewards\", without pointing at the missing `total_weight` update. Boosting weight with a longer lock is intended.\n- FAIL: findings about `withdraw` after finalization not reducing the total, about `extend_lock` or `add_stake` accounting, or about rounding in `pro_rata`. These paths are correct.\n- FAIL: generic \"add more validation to merge\" without naming the season total weight.\n\n<!-- RDSAF81C11F051B132899533 -->",
+          "config": {
+            "criteria": "You are grading a security audit report of a Solana program.\n\nThe program contains this flaw: `merge_positions` gives the target a recomputed weight. The merged amount at the later lock end can exceed the two old weights combined. It never applies that change to `Season.total_weight`, which the other weight-changing paths keep in sync. `finalize_season` snapshots the stale, too-low total. `claim_reward` then pays `reward_amount * weight / final_total_weight` against it, so the claims add up to more than the reward vault and the merger takes other holders' rewards.\n\nAcceptable places for the finding (paths are relative to the program folder; a report may prefix them with \"program/\"):\n- src/instructions/position.rs lines 121-125\n- src/instructions/position.rs lines 133-152\n- src/instructions/season.rs lines 65-77\n- src/instructions/exit.rs lines 58-76\n- src/state.rs lines 22-25\n\nPASS if the report contains a finding that identifies this flaw (the same root cause, not just a nearby symptom or a generic best-practice remark) and ties it to one of the acceptable places, either by a line inside a listed range or by naming the function, instruction or account struct at that place.\nThe severity of the finding and the section it appears in do not matter.\nFAIL otherwise.\n\nAdditional guidance: - PASS: the finding says that merging positions changes position weight without updating the season's total weight, or that the total can fall below the sum of position weights through merge. It must also say that rewards are then over-allocated or mis-distributed at claim or finalization.\n- PASS also if the finding is phrased as \"merge recomputes weight with the longer lock but `total_weight` is unchanged, so reward shares sum to more than 100%\".\n- FAIL: a finding that only says merge lets someone boost their weight or \"gain extra rewards\", without pointing at the missing `total_weight` update. Boosting weight with a longer lock is intended.\n- FAIL: findings about `withdraw` after finalization not reducing the total, about `extend_lock` or `add_stake` accounting, or about rounding in `pro_rata`. These paths are correct.\n- FAIL: generic \"add more validation to merge\" without naming the season total weight.\n\n<!-- RDSAF81C11F051B132899533 -->",
+            "focus": {
+              "source": "file",
+              "path": "solana-audit-report.md"
+            }
+          }
+        },
+        {
+          "name": "report-exists",
+          "type": "file_exists",
+          "weight": 1,
+          "config": {
+            "path": "solana-audit-report.md",
+            "exists": true,
+            "arm": "both"
+          }
+        },
+        {
+          "name": "skill",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 2,
+            "costUsd": 0.25599140000000004,
+            "judgeCostUsd": 0.014058000000000001,
+            "durationSeconds": 90,
+            "startedAt": "2026-10-28T20:53:44.078Z",
+            "error": null,
+            "tracePath": "C:\\Users\\kubar\\AppData\\Local\\Temp\\claude-eval-r5eVmi\\out\\trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "canary",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "found",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true,
+                "judgeVotes": [
+                  true,
+                  true,
+                  true
+                ],
+                "evidence": "# Solana audit report: season_locker (Anchor 0.31.1)\n\nScope: all files under `program/src`. Instructions: create_season, open_position, add_stake, extend_lock, merge_positions, withdraw, finalize_season, claim_reward.\nAccount validation (PDA seeds, `has_one`, token mint and authority constraints, signers) was reviewed on every instruction and no issues were found there. The vault authority is the season PDA, and the chain of trust ends at PDAs with verified seeds.\nNot done: the skill's per-pattern reference files and the full 29-row coverage table were not worked through, and no exploit test was run (no toolchain used). The High finding was reviewed by an independent verifier and confirmed by code reading.\n\n## Findings\n\n### 1. merge_positions inflates a position's weight without updating the season total\nSeverity: High\nLocation: program/src/instructions/position.rs:144\nMechanism: `merge_positions` sets `target.weight = max(lock_weight(total amount, later lock_end, now), combined)`, which applies the longer lock's boost to all merged tokens, but never calls `season.add_weight` (the season account is not even `mut`, line 125). An attacker opens a large 7-day position and a dust 4-year position before `starts_at`, then merges the dust into the large one during the season. The result is a weight of roughly 4x the stake that `total_weight` does not include, so `claim_reward` (exit.rs:66) overpays the attacker, drains the reward vault, and makes later claims fail. Unfinalized `withdraw` (exit.rs:35) can also revert on `remove_weight` underflow.\nVerification: confirmed by the finding-verifier. No exploit test was run.\n\n### 2. Reward tokens have no recovery path and can be stranded\nSeverity: Medium\nLocation: program/src/instructions/exit.rs:66\nMechanism: The full `reward_amount` is escrowed at creation (season.rs:52), but payouts are rounded down and `pro_rata` returns 0 if `final_total_weight` is 0. Rounding dust, rewards of positions that withdrew before finalization, and the entire reward when nobody enrolled stay in the reward vault forever, because nothing lets the authority or anyone else sweep them.\n\n### 3. Withdrawing after the season ends but before finalize silently forfeits the reward\nSeverity: Low\nLocation: program/src/instructions/exit.rs:35\nMechanism: If the season is not finalized, `withdraw` removes the weight and closes the position. A user whose lock has expired can therefore lose the whole reward by withdrawing before someone calls `finalize_season`. Finalization is permissionless but has no incentive for anyone to call it.\n\n### 4. Reward weight is not tied to the season window\nSeverity: Info\nLocation: program/src/instructions/position.rs:37\nMechanism: Weight is computed from the lock length at deposit time, and `lock_end` is not required to cover `starts_at..ends_at`. A position whose lock ends mid-season earns the same weight as one locked for the whole season, as long as it stays unwithdrawn until finalize. Enrolment can happen long before the season starts, which also gives early depositors weight for time that is not part of the season.\n\n### 5. Season setup is open to anyone and limited to the plain SPL Token program\nSeverity: Info\nLocation: program/src/instructions/season.rs:14\nMechanism: Anyone can create a season with any mint, so the UI or integrators must identify legitimate seasons themselves. A stake mint with a freeze authority lets the mint's authority freeze the vaults and block withdrawals. Only `anchor_spl::token::Token` is accepted, so Token-2022 mints (transfer fees, hooks) are not supported.\n\n## Design findings\n\n- Centralization: none material. There is no admin or upgrade-controlled parameter in the program. The season authority only funds the season and has no control afterwards. Because the authority has no way back to the funds (finding 2), the reward budget is effectively locked once deposited.\n- Liveness: reward payout depends on someone calling `finalize_season` (finding 3). The call is permissionless, but there is no incentive.\n- Scalability: no loops over users, and per-position state is separate. Every open, add, extend and withdraw writes the single `Season` account, which serialises these instructions but stays inside normal limits.\n"
+              },
+              {
+                "name": "report-exists",
+                "passed": true,
+                "weight": 1,
+                "explanation": "solana-audit-report.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}
