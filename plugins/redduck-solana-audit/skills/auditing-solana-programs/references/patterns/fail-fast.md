@@ -13,7 +13,8 @@ A transaction runs once and cannot wait for a better input. The program decides 
 
 ## Code signals
 - **Pyth pull:** `price_message` read directly instead of through `get_price_no_older_than(&clock, max_age, &feed_id)`; a large `max_age`, or one constant for every action; `feed_id` never compared; partial verification accepted through `get_price_no_older_than_with_custom_verification_level`.
-- **Legacy Pyth:** `get_price_unchecked()`, or `publish_time` never compared with `Clock::get()?.unix_timestamp`; price status not checked.
+- **Legacy Pyth:** `get_price_unchecked()`, or `publish_time` never compared with `Clock::get()?.unix_timestamp`; price status not checked. A `/// CHECK: validated by the Pyth SDK` comment on an `AccountInfo` price account is not a check: the account still needs `address = config.price_feed`. For legacy push accounts read through `pyth-sdk-solana`, check on-chain that the account's `publish_time` is current: with a staleness check a retired feed leaves the program stuck, without one it reads a frozen price.
+- **Feed identity by model:** with the pull receiver, users post their own `PriceUpdateV2` accounts, so many valid accounts exist per feed. The check is the receiver as owner, `feed_id` compared with config, and full verification, not an address pin. A sponsored push feed at a fixed address can be pinned by address.
 - **Switchboard:** `get_result()` without `check_staleness(..)` or `check_confidence_interval(..)`; on-demand `get_value(..)` with loose `max_stale_slots` or `min_samples`; `result.slot` never compared with the current slot.
 - **Randomness:** `RandomnessAccountData`, `seed_slot`, `reveal_slot`, `get_value(&clock)`. Look for settle paths that can run before the reveal, and for rounds with no stored open status.
 - **Fallbacks:** `unwrap_or(last_price)`, `unwrap_or_default()`, `Err(_) => cached` branches with no age limit on the cached value.
@@ -22,7 +23,7 @@ A transaction runs once and cannot wait for a better input. The program decides 
 
 ## Auditor questions
 1. List every instruction that reads an outside input. Before each use, which checks run: age, confidence, deviation, sign, feed identity, availability?
-2. Do the thresholds fit each action? Is the strictest check on risk-increasing actions, and do repay, deposit, withdraw and liquidate still work when the feed is degraded?
+2. Do the thresholds fit each action? Is the strictest check on risk-increasing actions, and do repay, deposit, withdraw and liquidate still work when the feed is degraded? Reference points: about 60 seconds of age and 1% confidence for active DeFi. A risk-increasing action with no confidence cap, or an age limit of minutes, is a realistic exposure.
 3. When a check fails, does the instruction return an error, or log and skip one step, or fall back to a cached or default value? Is the fallback's age limited?
 4. With a pull oracle, can the caller choose an older or a different update within the allowed age, to their advantage?
 5. For inputs that arrive later, is "pending" stored? Can the user settle, cancel, withdraw or start another round while it is pending?

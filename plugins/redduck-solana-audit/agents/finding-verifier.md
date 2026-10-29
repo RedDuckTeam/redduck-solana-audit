@@ -23,7 +23,7 @@ You verify a single finding from a Solana program audit. You receive the finding
    - a program cannot be re-entered through another program;
    - only an account's owner program can change its data or debit its lamports;
    - `Account<T>` checks owner and discriminator, `Signer` checks the signature;
-   - Anchor workspaces usually panic on overflow (`overflow-checks = true`);
+   - arithmetic panics on overflow only when the workspace-root `Cargo.toml` sets `overflow-checks = true` under `[profile.release]`, as Anchor's template does;
    - a closed Anchor account cannot be revived as the old program account.
 5. **Scenario replay.** Walk the scenario step by step against the code with concrete values. Any step that does not hold breaks the finding.
 

@@ -26,6 +26,7 @@ A program reads and writes only the accounts listed in the transaction, and each
 4. Is the global total brought up to date before it is read? While total supply is zero, are rewards lost, stuck or divided by zero?
 5. Can the receipt token move outside the program, for example by a plain token transfer, without settlement running for both sides?
 6. Must anything happen to accounts nobody touches, such as liquidation, expiry or a deadline? Who triggers it, and are they paid to?
+7. A lock start is a marker too. When a stake is topped up, does the new amount inherit an older lock start and skip the lock? If a top-up resets the start instead, can someone other than the owner top up a victim's position to keep it locked?
 
 ## How to confirm
 Write the sequence test. Advance the global total by letting time pass or adding rewards. Then change a balance through the path that skips settlement, and claim. Compare the payout with the correct share. For the creation case, deposit after rewards have built up, claim at once, and show rewards paid for time before the deposit. In a test (see `exploit-tests.md`), move time with a clock override or slot warp in LiteSVM or bankrun.
@@ -34,6 +35,7 @@ Write the sequence test. Advance the global total by letting time pass or adding
 - Settlement lives in one helper or shared constraint called by every handler that touches the account, transfer hooks included.
 - The receipt token cannot move outside the program, because it is non-transferable or held in program custody, or a transfer hook settles both sides.
 - The marker is set to the current total when the account is created.
+- Each top-up creates its own lock, or only the owner can top up a position.
 - A loop is bounded by a small constant fixed by the design, such as a few reward mints, not by the number of users.
 - Untouched accounts stay stale, but nothing reads them before they are touched, and actions that must reach them are permissionless and paid.
 

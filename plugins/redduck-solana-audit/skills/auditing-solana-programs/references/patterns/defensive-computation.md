@@ -14,7 +14,8 @@ Solana oracles publish a price together with an uncertainty band. Pyth gives `co
 ## Code signals
 - **Pyth:** `PriceUpdateV2`, `get_price_no_older_than`, `price_message.price`, `.conf`, `.exponent`, `ema_price`, `ema_conf`; legacy `Price { price, conf, expo, publish_time }` from `load_price_feed_from_account_info`. The signal is `conf` never read, or one price used for both collateral and debt.
 - **Switchboard:** `get_result()`, `latest_confirmed_round.std_deviation`, `PullFeedAccountData`, `std_dev`. Same signal for the deviation field.
-- **Scaling:** `price as u64` with no sign check; `expo` or `exponent` applied in one direction only; mint `decimals` not reconciled with the oracle exponent; `u128` results cast `as u64`.
+- **Scaling:** `price as u64` with no sign check; `expo` or `exponent` applied in one direction only; a signed exponent cast to unsigned, such as `(18 + expo) as u32`, which wraps when `expo` is outside the expected range, and `10u64.pow(..)` that can overflow; mint `decimals` not reconciled with the oracle exponent; `u128` results cast `as u64`.
+- **Cross rates:** a price built from two feeds, such as X/USD divided by USDC/USD, with age and confidence checked on only one of them. The relative confidence of the result is the sum of both.
 - **Rounding:** plain `/` or `checked_div` in share, collateral and fee math with no stated direction; `try_round_u64` or `.round()` where floor or ceil is needed; `mul_div_floor` and `mul_div_ceil` swapped.
 - **Thresholds:** one ratio for both borrowing and liquidation (`max_ltv == liquidation_threshold`), or no buffer between them.
 - **Two prices for one asset:** spot in one instruction and an average in another, or different rounding on deposit and on withdrawal.

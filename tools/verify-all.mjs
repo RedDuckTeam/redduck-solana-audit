@@ -117,7 +117,8 @@ export async function runAll({ ROOT, PLUGIN, SKILL, BENCH, PATTERN_SLUGS }) {
   if (!/MIT License/.test(read(path.join(ROOT, 'LICENSE')))) fail('V13', 'LICENSE is not MIT');
   if (!/## 0\.1\.0/.test(read(path.join(ROOT, 'CHANGELOG.md')))) fail('V13', 'CHANGELOG.md lacks 0.1.0');
   const manifest = JSON.parse(read(path.join(PLUGIN, '.claude-plugin', 'plugin.json')));
-  if (manifest.version !== '0.1.0') fail('V13', `plugin.json version is ${manifest.version}`);
+  const topRelease = (read(path.join(ROOT, 'CHANGELOG.md')).match(/^## (\d+\.\d+\.\d+)/m) || [])[1];
+  if (manifest.version !== topRelease) fail('V13', `plugin.json version ${manifest.version} differs from the top CHANGELOG release ${topRelease}`);
   for (const d of ['awesome-solana-ai-pr.md', 'solana-dev-skill-pr.md', 'anthropic-directory-submission.md', 'tob-skills-curated-pr.md', 'awesome-lists.md']) {
     if (!fs.existsSync(path.join(ROOT, 'drafts', d))) fail('V13', `drafts/${d} missing`);
   }

@@ -38,6 +38,7 @@ Every step is required. Steps 3, 4, 7 and 8 are where this skill finds what a qu
 - Find the framework: Anchor (`#[program]`, `anchor_lang`), native (`entrypoint!`, `process_instruction`) or Pinocchio (`pinocchio::`).
 - List every program, every instruction and every account type.
 - Read any `README`, `ARCHITECTURE` or deployment notes. Facts about who runs what off-chain are part of the design.
+- Note whether the program is already deployed, and at which version. Layout changes to accounts already on chain are a `checklist-realloc` question.
 
 **2. Account map.** For each instruction, note for every account:
 - who can create it;
@@ -71,12 +72,15 @@ Then ask whether an attacker could create a fresh set of accounts that agree wit
 | Signed messages, claims, nonces, sequence numbers, deltas, counters, status transitions, close and reopen | one-way-state |
 | Swaps, deposits or withdrawals at a computed rate, liquidations, any amount the user cannot know in advance | boundary-of-consent |
 | Prices or rates derived from the program's own state (pool reserves, balances, TWAP accumulators) | internal-oracle, defensive-computation |
+| A swap pool: two reserves, an LP or position mint, `sqrt_price`, ticks, tick arrays | archetypes/amm, internal-oracle, defensive-computation, boundary-of-consent |
+| NFT collection gates, NFT-held positions, NFT-keyed claims | root-of-trust, identity-rejection |
+| Weighted draws, raffles, merkle or signature claims | complexity-asymmetry, commit-execution-split |
 | External oracle reads (Pyth, Switchboard, others): price, confidence, publish time, exponent | defensive-computation, fail-fast |
 | Valuation of collateral or debt, share math, rounding | defensive-computation |
 | Rollups, ephemeral rollups, delegation programs, bridges, off-chain matching | execution-layer-shift, dependency-independency |
 | CPI into external protocols, hardcoded external program ids, upgrade authority, keys held by third parties | dependency-independency |
 
-Pattern files live in `references/patterns/<slug>.md`.
+Pattern files live in `references/patterns/<slug>.md`. `archetypes/amm` is `references/archetypes/amm.md`: it lists pool invariants and has no coverage row, so report what it finds under the pattern or checklist item it names.
 
 **5. Baseline checklist.** Work through [references/baseline-checklist.md](references/baseline-checklist.md). It covers the classic bug classes the patterns do not, such as arithmetic, duplicate accounts, account closing and Token-2022.
 

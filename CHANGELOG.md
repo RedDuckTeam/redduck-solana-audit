@@ -8,6 +8,28 @@ Versions follow semantic versioning:
 - **Minor:** new patterns, checklist items or workflow steps.
 - **Major:** changes to the report format that break tools reading it.
 
+## 0.2.0
+
+Material from the RedDuck Academy course Development on Solana, folded into the existing skill. The coverage table keeps its 29 rows.
+
+- Checklist items extended:
+  - `init-frontrun`: `init_if_needed` reinitialization, manual init paths, ATA squatting.
+  - `closing`: lamport withdrawals that ignore the rent reserve and implicitly close an account.
+  - `token-2022`: mint and freeze authorities on classic and Token-2022 mints, share mint authority, one claim per deposit for receipt tokens, push payouts, UI amounts.
+  - `realloc`: account layout changes across program upgrades.
+  - `signers-bumps-cpi`: `has_one` without `Signer`, type confusion in native code, PDA signatures forwarded to external programs.
+- Patterns extended:
+  - `commit-execution-split`: Jito bundles, leader windows, VRF callback authentication and liveness.
+  - `complexity-asymmetry`: weighted-draw ticket ranges, merkle claim namespaces and leaf encoding.
+  - `fail-fast`: Pyth feed identity by model, unverified `/// CHECK` comments, legacy feeds, threshold reference points.
+  - `defensive-computation`: exponent casts, cross rates.
+  - `root-of-trust`: NFT collection gates and NFT-held positions.
+  - `lazy-loading`: lock start on top-ups.
+- New reference `archetypes/amm.md`: constant-product and concentrated-liquidity invariants, routed from step 4.
+- Seven new misreports: rent-exempt rejection, the 200,000 CU default, CPI privilege escalation, `init_if_needed` pre-creation, forwarded `UncheckedAccount`, mint authority, missing events. The overflow entry now depends on the workspace-root profile, here and in the verifier agent. Misreports are renumbered, so cite them by title.
+- `exploit-tests.md`: what a test may forge, moving the clock, reading why a transaction failed, compute-limit findings.
+- Step 1 records whether the program is already deployed.
+
 ## 0.1.0
 
 First release.

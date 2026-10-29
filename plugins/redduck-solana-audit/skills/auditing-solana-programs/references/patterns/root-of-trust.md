@@ -18,6 +18,12 @@ The transaction lists every account an instruction reads, and the sender picks t
   - `find_program_address` results compared with nothing.
 - **Introspection:** reading the instructions sysvar (`load_instruction_at`, `get_instruction_relative`) from an account whose address is not compared with `sysvar::instructions::ID`, and Ed25519/Secp256k1 verification where the signer key or message inside the verified instruction is not compared with stored, trusted values.
 - **Mints and token accounts:** the mint or vault is checked only against another passed account, instead of against a config PDA.
+- **NFT gates and NFT positions:**
+  - a collection gate that compares `metadata.collection` with the expected key but never reads its `verified` flag, or a creator address compared without `creator.verified`;
+  - a metadata account not derived from the mint with `seeds::program` set to Token Metadata;
+  - an "NFT" accepted with no check of `decimals == 0` and `supply == 1`, or of a master edition;
+  - a position controlled through a stored `position.owner` while the position NFT can be sold, instead of through the holder's token account (`mint == position.nft_mint`, `amount == 1`, owner is the signer);
+  - these signals are for Token Metadata. A Metaplex Core asset proves membership with `UpdateAuthority::Collection(key)` on an asset owned by the Core program, and has no `verified` flag. A compressed NFT proves ownership with a Bubblegum proof against the tree.
 
 ## Auditor questions
 1. For each account the instruction trusts, what is it compared with, and what is that compared with? Follow the chain to its end.
@@ -25,6 +31,7 @@ The transaction lists every account an instruction reads, and the sender picks t
 3. Could an attacker create a fresh config, pool, bank, oracle or vault through a public instruction, or as an unowned account with copied data, that satisfies every check?
 4. Do all instructions that move value use the same root? Attackers look for the one instruction that skipped it.
 5. For signature introspection: are the sysvar address, the verifying program id, the signer key and the signed message all checked against trusted values, in that order?
+6. For NFT gates: could the attacker mint their own NFT, or a fungible token, with metadata that names the collection, and pass? Who controls a position after its NFT changes hands?
 
 ## How to confirm
 Build the fake set. List the accounts the attacker creates, what data they put in them, and the call that passes every check. In a test (see `exploit-tests.md`), create those accounts in LiteSVM or bankrun and show the instruction succeeding and moving value. Without a toolchain, write the scenario with the exact constraint lines it passes.
@@ -34,6 +41,7 @@ Build the fake set. List the accounts the attacker creates, what data they put i
 - The account is `Account<T>` and the only instruction that creates `T` is gated by a stored authority or uses fixed seeds.
 - The instructions sysvar account is pinned with `#[account(address = sysvar::instructions::ID)]` on an `UncheckedAccount`, or read through `load_instruction_at_checked` / `load_current_index_checked`, which compare the address. The instructions sysvar does not implement Anchor's `Sysvar` trait, so it cannot be declared as `Sysvar<'info, Instructions>`.
 - A token account is constrained by `token::mint = config.mint` where `config` is itself anchored.
+- An NFT gate checks the verified collection on metadata derived from the mint, and an edition or `decimals == 0` with `supply == 1`.
 
 ## Real-world cases
 - **Failure.** A stablecoin minted against collateral after checking that the collateral account, a "bank" record and some pool accounts were consistent with each other. Banks could be created by anyone, so an attacker created a consistent fake set and minted without real collateral.
